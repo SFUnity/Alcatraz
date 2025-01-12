@@ -23,6 +23,6 @@ public abstract class Util {
   }
 
   public static Distance hypot(Distance a, Distance b) {
-    return a.unit().of(Math.hypot(a.magnitude(), b.magnitude()));
+    return a.unit().of(Math.hypot(a.baseUnitMagnitude(), b.baseUnitMagnitude()));
   }
 }

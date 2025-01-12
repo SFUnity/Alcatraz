@@ -39,9 +39,9 @@ public class DriveConstants {
   public static final Distance trackWidth = Inches.of(26.5);
   public static final Distance wheelBase = Inches.of(26.5);
   public static final Distance driveBaseRadius =  Util.hypot(trackWidth.div(2.0), wheelBase.div(2.0));
-  public static final AngularVelocity maxAngularSpeed = RadiansPerSecond.of(maxSpeed.magnitude() / driveBaseRadius.magnitude());
+  public static final AngularVelocity maxAngularSpeed = RadiansPerSecond.of(maxSpeed.baseUnitMagnitude() / driveBaseRadius.baseUnitMagnitude());
   public static final AngularAcceleration maxAngularAcceleration =
-      RadiansPerSecondPerSecond.of(maxAcceleration.magnitude() / driveBaseRadius.baseUnitMagnitude());
+      RadiansPerSecondPerSecond.of(maxAcceleration.baseUnitMagnitude() / driveBaseRadius.baseUnitMagnitude());
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
         new Translation2d(trackWidth.div(2.0), wheelBase.div(2.0)),
