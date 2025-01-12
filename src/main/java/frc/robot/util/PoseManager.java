@@ -1,5 +1,7 @@
 package frc.robot.util;
 
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -12,9 +14,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Distance;
 import frc.robot.subsystems.drive.DriveConstants;
-
-import static edu.wpi.first.units.Units.Meters;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;

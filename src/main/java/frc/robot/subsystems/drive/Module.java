@@ -13,8 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
-import static frc.robot.subsystems.drive.DriveConstants.*;
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.drive.DriveConstants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;

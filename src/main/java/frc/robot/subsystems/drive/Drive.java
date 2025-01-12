@@ -85,13 +85,15 @@ public class Drive extends SubsystemBase {
       new LoggedTunableNumber("Drive/Commands/Linear - maxVelocity", maxSpeed.in(MetersPerSecond));
   private static final LoggedTunableNumber maxLinearAccelerationTunable =
       new LoggedTunableNumber(
-          "Drive/Commands/Linear - maxAcceleration", maxAcceleration.in(MetersPerSecondPerSecond) * 0.4);
+          "Drive/Commands/Linear - maxAcceleration",
+          maxAcceleration.in(MetersPerSecondPerSecond) * 0.4);
   private static final LoggedTunableNumber maxAngularSpeedTunable =
       new LoggedTunableNumber(
           "Drive/Commands/Theta - maxVelocity", maxAngularSpeed.in(RadiansPerSecond) * 0.8);
   private static final LoggedTunableNumber maxAngularAccelerationTunable =
       new LoggedTunableNumber(
-          "Drive/Commands/Theta - maxAcceleration", maxAngularAcceleration.in(RadiansPerSecondPerSecond) * 0.8);
+          "Drive/Commands/Theta - maxAcceleration",
+          maxAngularAcceleration.in(RadiansPerSecondPerSecond) * 0.8);
 
   private final ProfiledPIDController thetaController;
   private final ProfiledPIDController linearController;
@@ -584,13 +586,15 @@ public class Drive extends SubsystemBase {
 
   private void updateConstraints() {
     linearController.setConstraints(
-        new TrapezoidProfile.Constraints(maxLinearSpeedTunable.get(), maxLinearAccelerationTunable.get()));
+        new TrapezoidProfile.Constraints(
+            maxLinearSpeedTunable.get(), maxLinearAccelerationTunable.get()));
     updateThetaConstraints();
   }
 
   private void updateThetaConstraints() {
     thetaController.setConstraints(
-        new TrapezoidProfile.Constraints(maxAngularSpeedTunable.get(), maxAngularAccelerationTunable.get()));
+        new TrapezoidProfile.Constraints(
+            maxAngularSpeedTunable.get(), maxAngularAccelerationTunable.get()));
   }
 
   private void resetControllers(Pose2d goalPose) {

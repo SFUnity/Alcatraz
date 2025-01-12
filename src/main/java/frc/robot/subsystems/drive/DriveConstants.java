@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -26,21 +28,22 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.constantsGlobal.Constants;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.Util;
-
-import static edu.wpi.first.units.Units.*;
-
 import java.util.function.BooleanSupplier;
 
 public class DriveConstants {
   public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.8);
-  public static final LinearAcceleration maxAcceleration = FeetPerSecondPerSecond.of(75.0); // This is what 6328
+  public static final LinearAcceleration maxAcceleration =
+      FeetPerSecondPerSecond.of(75.0); // This is what 6328
   public static final double odometryFrequency = 100.0; // Hz
   public static final Distance trackWidth = Inches.of(26.5);
   public static final Distance wheelBase = Inches.of(26.5);
-  public static final Distance driveBaseRadius =  Util.hypot(trackWidth.div(2.0), wheelBase.div(2.0));
-  public static final AngularVelocity maxAngularSpeed = RadiansPerSecond.of(maxSpeed.baseUnitMagnitude() / driveBaseRadius.baseUnitMagnitude());
+  public static final Distance driveBaseRadius =
+      Util.hypot(trackWidth.div(2.0), wheelBase.div(2.0));
+  public static final AngularVelocity maxAngularSpeed =
+      RadiansPerSecond.of(maxSpeed.baseUnitMagnitude() / driveBaseRadius.baseUnitMagnitude());
   public static final AngularAcceleration maxAngularAcceleration =
-      RadiansPerSecondPerSecond.of(maxAcceleration.baseUnitMagnitude() / driveBaseRadius.baseUnitMagnitude());
+      RadiansPerSecondPerSecond.of(
+          maxAcceleration.baseUnitMagnitude() / driveBaseRadius.baseUnitMagnitude());
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
         new Translation2d(trackWidth.div(2.0), wheelBase.div(2.0)),
