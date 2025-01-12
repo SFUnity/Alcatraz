@@ -10,7 +10,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Distance;
 import frc.robot.subsystems.drive.DriveConstants;
+
+import static edu.wpi.first.units.Units.Meters;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -48,17 +52,17 @@ public class PoseManager {
     this.robotVelocity = robotVelocity;
   }
 
-  public double getDistanceTo(Pose2d pose) {
+  public Distance getDistanceTo(Pose2d pose) {
     return getDistanceTo(pose.getTranslation());
   }
 
-  public double getDistanceTo(Translation3d translation) {
+  public Distance getDistanceTo(Translation3d translation) {
     return getDistanceTo(translation.toTranslation2d());
   }
 
-  public double getDistanceTo(Translation2d translation) {
+  public Distance getDistanceTo(Translation2d translation) {
     Translation2d currentTranslation = getPose().getTranslation();
-    return currentTranslation.getDistance(translation);
+    return Meters.of(currentTranslation.getDistance(translation));
   }
 
   public Rotation2d getHorizontalAngleTo(Pose2d pose) {
@@ -76,9 +80,9 @@ public class PoseManager {
   }
 
   public Rotation2d getVerticalAngleTo(Translation3d translation) {
-    double horizontalDiff = getDistanceTo(translation);
+    double horizontalDiff = getDistanceTo(translation).in(Meters);
     double zDiff = translation.getZ();
-    Rotation2d theta = new Rotation2d(Math.atan2(zDiff, horizontalDiff));
+    Rotation2d theta = new Rotation2d(horizontalDiff, zDiff);
     return theta;
   }
 
