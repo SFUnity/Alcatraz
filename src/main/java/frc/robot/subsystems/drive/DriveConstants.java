@@ -18,28 +18,36 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.constantsGlobal.Constants;
 import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.Util;
+
+import static edu.wpi.first.units.Units.*;
+
 import java.util.function.BooleanSupplier;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.8;
-  public static final double maxAccelerationMetersPerSec =
-      Units.feetToMeters(75.0); // This is what 6328
+  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.8);
+  public static final LinearAcceleration maxAcceleration = FeetPerSecondPerSecond.of(75.0); // This is what 6328
   public static final double odometryFrequency = 100.0; // Hz
-  public static final double trackWidth = Units.inchesToMeters(26.5);
-  public static final double wheelBase = Units.inchesToMeters(26.5);
-  public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
-  public static final double maxAngularSpeedRadiansPerSec = maxSpeedMetersPerSec / driveBaseRadius;
-  public static final double maxAngularAccelerationRadiansPerSec =
-      maxAccelerationMetersPerSec / driveBaseRadius;
+  public static final Distance trackWidth = Inches.of(26.5);
+  public static final Distance wheelBase = Inches.of(26.5);
+  public static final Distance driveBaseRadius =  Util.hypot(trackWidth.div(2.0), wheelBase.div(2.0));
+  public static final AngularVelocity maxAngularSpeed = RadiansPerSecond.of(maxSpeed.magnitude() / driveBaseRadius.magnitude());
+  public static final AngularAcceleration maxAngularAcceleration =
+      RadiansPerSecondPerSecond.of(maxAcceleration.magnitude() / driveBaseRadius.baseUnitMagnitude());
   public static final Translation2d[] moduleTranslations =
       new Translation2d[] {
-        new Translation2d(trackWidth / 2.0, wheelBase / 2.0),
-        new Translation2d(trackWidth / 2.0, -wheelBase / 2.0),
-        new Translation2d(-trackWidth / 2.0, wheelBase / 2.0),
-        new Translation2d(-trackWidth / 2.0, -wheelBase / 2.0)
+        new Translation2d(trackWidth.div(2.0), wheelBase.div(2.0)),
+        new Translation2d(trackWidth.div(2.0), wheelBase.div(-2.0)),
+        new Translation2d(trackWidth.div(-2.0), wheelBase.div(2.0)),
+        new Translation2d(trackWidth.div(-2.0), wheelBase.div(-2.0))
       };
   public static final SwerveDriveKinematics kinematics =
       new SwerveDriveKinematics(moduleTranslations);

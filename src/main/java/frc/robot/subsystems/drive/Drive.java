@@ -81,17 +81,17 @@ public class Drive extends SubsystemBase {
   private static final LoggedTunableNumber thetaToleranceDeg =
       new LoggedTunableNumber("Drive/Commands/Theta/toleranceDeg", 1.0);
 
-  private static final LoggedTunableNumber maxLinearVelocity =
-      new LoggedTunableNumber("Drive/Commands/Linear - maxVelocity", maxSpeedMetersPerSec);
-  private static final LoggedTunableNumber maxLinearAcceleration =
+  private static final LoggedTunableNumber maxLinearSpeedTunable =
+      new LoggedTunableNumber("Drive/Commands/Linear - maxVelocity", maxSpeed.in(MetersPerSecond));
+  private static final LoggedTunableNumber maxLinearAccelerationTunable =
       new LoggedTunableNumber(
-          "Drive/Commands/Linear - maxAcceleration", maxAccelerationMetersPerSec * 0.4);
-  private static final LoggedTunableNumber maxAngularVelocity =
+          "Drive/Commands/Linear - maxAcceleration", maxAcceleration.in(MetersPerSecondPerSecond) * 0.4);
+  private static final LoggedTunableNumber maxAngularSpeedTunable =
       new LoggedTunableNumber(
-          "Drive/Commands/Theta - maxVelocity", maxAngularSpeedRadiansPerSec * 0.8);
-  private static final LoggedTunableNumber maxAngularAcceleration =
+          "Drive/Commands/Theta - maxVelocity", maxAngularSpeed.in(RadiansPerSecond) * 0.8);
+  private static final LoggedTunableNumber maxAngularAccelerationTunable =
       new LoggedTunableNumber(
-          "Drive/Commands/Theta - maxAcceleration", maxAngularAccelerationRadiansPerSec * 0.8);
+          "Drive/Commands/Theta - maxAcceleration", maxAngularAcceleration.in(RadiansPerSecondPerSecond) * 0.8);
 
   private final ProfiledPIDController thetaController;
   private final ProfiledPIDController linearController;
@@ -253,7 +253,7 @@ public class Drive extends SubsystemBase {
   }
 
   private void setModuleSetpoints(SwerveModuleState[] setpointStates) {
-    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
+    SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeed.in(MetersPerSecond));
 
     // Log unoptimized setpoints and setpoint speeds
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -411,7 +411,7 @@ public class Drive extends SubsystemBase {
 
           // Square values and scale to max velocity
           omega = Math.copySign(omega * omega, omega);
-          omega *= maxAngularSpeedRadiansPerSec;
+          omega *= maxAngularSpeed.in(RadiansPerSecond);
 
           // Get linear velocity
           Translation2d linearVelocity = getLinearVelocityFromJoysticks();
@@ -541,7 +541,7 @@ public class Drive extends SubsystemBase {
 
     // Square values and scale to max velocity
     linearMagnitude = linearMagnitude * linearMagnitude;
-    linearMagnitude *= maxSpeedMetersPerSec;
+    linearMagnitude *= maxSpeed.in(MetersPerSecond);
 
     // Calcaulate new linear velocity
     Translation2d linearVelocity = new Translation2d(linearMagnitude, linearDirection);
@@ -584,13 +584,13 @@ public class Drive extends SubsystemBase {
 
   private void updateConstraints() {
     linearController.setConstraints(
-        new TrapezoidProfile.Constraints(maxLinearVelocity.get(), maxLinearAcceleration.get()));
+        new TrapezoidProfile.Constraints(maxLinearSpeedTunable.get(), maxLinearAccelerationTunable.get()));
     updateThetaConstraints();
   }
 
   private void updateThetaConstraints() {
     thetaController.setConstraints(
-        new TrapezoidProfile.Constraints(maxAngularVelocity.get(), maxAngularAcceleration.get()));
+        new TrapezoidProfile.Constraints(maxAngularSpeedTunable.get(), maxAngularAccelerationTunable.get()));
   }
 
   private void resetControllers(Pose2d goalPose) {
