@@ -1,6 +1,11 @@
 package frc.robot.util;
 
+import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import static edu.wpi.first.units.Units.Meters;
+
 import org.littletonrobotics.junction.Logger;
 
 public abstract class Util {
@@ -18,5 +23,10 @@ public abstract class Util {
     Logger.recordOutput(
         sName + "command",
         s.getCurrentCommand() != null ? s.getCurrentCommand().getName() : "none");
+  }
+
+  public static Distance hypot(Distance a, Distance b) {
+    DistanceUnit unit = Meters;
+    return unit.of(Math.hypot(a.in(unit), b.in(unit)));
   }
 }
