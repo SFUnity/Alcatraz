@@ -33,6 +33,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -473,9 +474,9 @@ public class Drive extends SubsystemBase {
           // Calculate linear speed
           Pose2d targetPose = goalPose.get();
 
-          double currentDistance = poseManager.getDistanceTo(targetPose);
+          Distance currentDistance = poseManager.getDistanceTo(targetPose);
 
-          double driveVelocityScalar = linearController.calculate(currentDistance, 0.0);
+          double driveVelocityScalar = linearController.calculate(currentDistance.in(Meters), 0.0);
 
           if (linearAtGoal()) driveVelocityScalar = 0.0;
 
@@ -600,7 +601,7 @@ public class Drive extends SubsystemBase {
             new Translation2d(fieldVelocity.dx, fieldVelocity.dy)
                 .rotateBy(poseManager.getHorizontalAngleTo(goalPose))
                 .getX());
-    linearController.reset(poseManager.getDistanceTo(goalPose), linearVelocity);
+    linearController.reset(poseManager.getDistanceTo(goalPose).in(Meters), linearVelocity);
     resetThetaController();
   }
 
