@@ -13,6 +13,9 @@
 
 package frc.robot;
 
+import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.reefName;
+import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.sourceName;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.PortForwarder;
@@ -27,6 +30,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.constantsGlobal.BuildConstants;
 import frc.robot.constantsGlobal.Constants;
+import frc.robot.subsystems.apriltagvision.AprilTagVision;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
+import frc.robot.subsystems.apriltagvision.AprilTagVisionIOLimelight;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.DriveCommandsConfig;
 import frc.robot.subsystems.drive.GyroIO;
@@ -75,6 +81,8 @@ public class Robot extends LoggedRobot {
 
   // Subsystems
   private final Drive drive;
+  private final AprilTagVision aprilTagVision1;
+  private final AprilTagVision aprilTagVision2;
 
   // Non-subsystems
   private final PoseManager poseManager = new PoseManager();
@@ -171,6 +179,10 @@ public class Robot extends LoggedRobot {
                 new ModuleIOMixed(3),
                 poseManager,
                 driveCommandsConfig);
+        aprilTagVision1 =
+            new AprilTagVision(new AprilTagVisionIOLimelight(reefName), poseManager);
+        aprilTagVision2 =
+            new AprilTagVision(new AprilTagVisionIOLimelight(sourceName), poseManager);
         break;
 
       case SIM:
@@ -184,6 +196,8 @@ public class Robot extends LoggedRobot {
                 new ModuleIOSim(),
                 poseManager,
                 driveCommandsConfig);
+        aprilTagVision1 = new AprilTagVision(new AprilTagVisionIO() {}, poseManager);
+        aprilTagVision2 = new AprilTagVision(new AprilTagVisionIO() {}, poseManager);
         break;
 
       default:
@@ -197,6 +211,8 @@ public class Robot extends LoggedRobot {
                 new ModuleIO() {},
                 poseManager,
                 driveCommandsConfig);
+        aprilTagVision1 = new AprilTagVision(new AprilTagVisionIO() {}, poseManager);
+        aprilTagVision2 = new AprilTagVision(new AprilTagVisionIO() {}, poseManager);
         break;
     }
 
