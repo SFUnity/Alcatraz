@@ -46,6 +46,8 @@ import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.carriage.CarriageIO;
 import frc.robot.subsystems.carriage.CarriageIOSim;
 import frc.robot.subsystems.carriage.CarriageIOSparkMax;
+import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbIO;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.DriveCommandsConfig;
 import frc.robot.subsystems.drive.GyroIO;
@@ -112,6 +114,7 @@ public class Robot extends LoggedRobot {
   private final Carriage carriage;
   private final Intake intake;
   private final AprilTagVision vision;
+  private final Climb climb;
 
   // Non-subsystems
   private final PoseManager poseManager = new PoseManager();
@@ -222,6 +225,7 @@ public class Robot extends LoggedRobot {
                 poseManager,
                 new AprilTagVisionIOLimelight(leftName),
                 new AprilTagVisionIOLimelight(rightName));
+        climb = new Climb(new ClimbIOSparkMax());
         break;
 
       case SIM:
