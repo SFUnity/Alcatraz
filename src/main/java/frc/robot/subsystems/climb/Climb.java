@@ -11,4 +11,9 @@ public class Climb extends SubsystemBase {
   public Climb(ClimbIO io) {
     this.io = io;
   }
+
+  @Override
+  public void periodic() {
+    io.updateInputs(inputs);
+  }
 }

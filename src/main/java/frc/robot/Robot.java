@@ -63,6 +63,10 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkMax;
+import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.ClimbIO;
+import frc.robot.subsystems.climb.ClimbIOSim;
+import frc.robot.subsystems.climb.ClimbIOSparkMax;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.PoseManager;
@@ -244,6 +248,7 @@ public class Robot extends LoggedRobot {
         intake = new Intake(new IntakeIOSim());
         vision =
             new AprilTagVision(poseManager, new AprilTagVisionIO() {}, new AprilTagVisionIO() {});
+        climb = new Climb(new ClimbIOSim());
         break;
 
       default:
@@ -262,6 +267,7 @@ public class Robot extends LoggedRobot {
         intake = new Intake(new IntakeIO() {});
         vision =
             new AprilTagVision(poseManager, new AprilTagVisionIO() {}, new AprilTagVisionIO() {});
+        climb = new Climb(new ClimbIOSim());
         break;
     }
 
