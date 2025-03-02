@@ -26,4 +26,14 @@ public class ClimbIOSparkMax implements ClimbIO {
     inputs.appliedVolts = climbMotor.getAppliedOutput() * climbMotor.getBusVoltage();
     inputs.currentAmps = climbMotor.getOutputCurrent();
   }
+
+  @Override
+  public void runVolts(double volts) {
+    climbMotor.setVoltage(volts);
+  }
+
+  @Override
+  public void resetEncoder() {
+    encoder.setPosition(0);
+  }
 }

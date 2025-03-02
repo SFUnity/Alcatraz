@@ -12,4 +12,8 @@ public interface ClimbIO {
   }
 
   public default void updateInputs(ClimbIOInputs inputs) {}
+
+  public default void runVolts(double volts) {}
+
+  public default void resetEncoder() {}
 }
