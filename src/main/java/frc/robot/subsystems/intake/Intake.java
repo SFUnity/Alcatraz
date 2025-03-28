@@ -31,8 +31,10 @@ public class Intake extends SubsystemBase {
   public static boolean simHasGP = false;
   private boolean runningIceCream = false;
 
+  private boolean lastGroundAlgae = groundAlgae.get();
+
   private final LoggedTunableNumber spikeCurrent =
-      new LoggedTunableNumber("Intake/spikeCurrent", groundAlgae ? 17 : 17);
+      new LoggedTunableNumber("Intake/spikeCurrent", groundAlgae.get() ? 17 : 17);
 
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
@@ -50,8 +52,9 @@ public class Intake extends SubsystemBase {
     Logger.recordOutput("Intake/startedIntaking", startedIntaking);
     lowered = inputs.pivotCurrentPositionDeg >= loweredAngle.get() / 2;
 
-    if (groundAlgae) { // * There's a specific pattern in the current draw of the rollers that we're
-      // checking for here
+    if (groundAlgae.get()) {
+      // There's a specific pattern in the current draw of the rollers that we're checking for here
+
       // Check that the pivot is lowered and not rising
       if ((inputs.pivotAppliedVolts <= 0.5 && lowered) || runningIceCream) {
         // Check if the current is high enough to be intaking
@@ -81,6 +84,11 @@ public class Intake extends SubsystemBase {
       if (filteredCurrent > spikeCurrent.get() && inputs.pivotAppliedVolts <= 1.5 && lowered) {
         hasGP = true;
       }
+    }
+
+    if (lastGroundAlgae != groundAlgae.get()) {
+      updateTunables();
+      lastGroundAlgae = groundAlgae.get();
     }
 
     Logger.recordOutput("Intake/runningIceCream", runningIceCream);
@@ -122,7 +130,7 @@ public class Intake extends SubsystemBase {
   }
 
   private void rollersStopOrHold() {
-    double holdSpeed = groundAlgae ? 0.15 : 0;
+    double holdSpeed = groundAlgae.get() ? 0.15 : 0;
     io.runRollers(GPHeld() ? holdSpeed : 0);
   }
 
@@ -150,8 +158,8 @@ public class Intake extends SubsystemBase {
   }
 
   public Command poopCmd(BooleanSupplier shouldPlace) {
-    final double highCurrent = groundAlgae ? 10 : 15;
-    final double lowCurrent = groundAlgae ? 5 : 7;
+    final double highCurrent = groundAlgae.get() ? 10 : 15;
+    final double lowCurrent = groundAlgae.get() ? 5 : 7;
     return Commands.waitUntil(() -> filteredCurrent > highCurrent)
         .andThen(
             Commands.waitUntil(() -> filteredCurrent < lowCurrent),
@@ -163,7 +171,7 @@ public class Intake extends SubsystemBase {
                     () ->
                         inputs.pivotCurrentPositionDeg >= l1Angle.get() - .75
                                 && shouldPlace.getAsBoolean()
-                            || groundAlgae)
+                            || groundAlgae.get())
                 .andThen(
                     run(() -> {
                           rollersOut();

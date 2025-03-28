@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.funnel.Funnel;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.util.AllianceFlipUtil;
 import frc.robot.util.AlwaysLoggedTunableNumber;
@@ -32,6 +33,7 @@ public class Autos {
   private final Carriage carriage;
   private final Elevator elevator;
   private final Intake intake;
+  private final Funnel funnel;
   private final PoseManager poseManager;
 
   private final AutoFactory factory;
@@ -49,11 +51,17 @@ public class Autos {
       new AlwaysLoggedTunableNumber("delayBeforeMoving", 3);
 
   public Autos(
-      Drive drive, Carriage carriage, Elevator elevator, Intake intake, PoseManager poseManager) {
+      Drive drive,
+      Carriage carriage,
+      Elevator elevator,
+      Intake intake,
+      Funnel funnel,
+      PoseManager poseManager) {
     this.drive = drive;
     this.carriage = carriage;
     this.elevator = elevator;
     this.intake = intake;
+    this.funnel = funnel;
     this.poseManager = poseManager;
 
     factory =
@@ -176,7 +184,8 @@ public class Autos {
       AutoTrajectory LToStationHigh) {
 
     // Intake when near station
-    new Trigger(() -> poseManager.nearStation(1)).whileTrue(carriage.intakeCoral());
+    new Trigger(() -> poseManager.nearStation(1))
+        .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
     // When the routine begins, reset odometry and start the first trajectory
     routine

@@ -8,6 +8,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.constantsGlobal.Constants;
+import frc.robot.util.LoggedTunableNumber;
 
 public class IntakeIOSim implements IntakeIO {
 
@@ -20,7 +21,7 @@ public class IntakeIOSim implements IntakeIO {
           minAngleRads,
           maxAngleRads,
           false,
-          maxAngleRads);
+          minAngleRads);
 
   private final PIDController controller;
   private double pivotAppliedVolts = 0.0;
@@ -28,18 +29,20 @@ public class IntakeIOSim implements IntakeIO {
 
   public IntakeIOSim() {
     controller = new PIDController(kP.get(), 0.0, 0.0);
-    sim.setState(maxAngleRads, 0.0);
+    sim.setState(minAngleRads, 0.0);
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
     sim.update(Constants.loopPeriodSecs);
 
-    inputs.pivotCurrentPositionDeg = Units.radiansToDegrees(sim.getAngleRads());
+    inputs.pivotCurrentPositionDeg = getAngleDeg();
     inputs.pivotAppliedVolts = pivotAppliedVolts;
     inputs.pivotCurrentAmps = sim.getCurrentDrawAmps();
 
     inputs.rollersAppliedVolts = rollersAppliedVolts;
+
+    LoggedTunableNumber.ifChanged(hashCode(), () -> controller.setP(kP.get()), kP);
 
     // Reset input
     sim.setInputVoltage(0.0);
@@ -52,8 +55,12 @@ public class IntakeIOSim implements IntakeIO {
 
   @Override
   public void setPivotPosition(double angle) {
-    double volts = controller.calculate(sim.getAngleRads(), Units.degreesToRadians(angle));
+    double volts = controller.calculate(getAngleDeg(), angle);
     pivotAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
     sim.setInputVoltage(pivotAppliedVolts);
+  }
+
+  private double getAngleDeg() {
+    return Units.radiansToDegrees(sim.getAngleRads() - minAngleRads);
   }
 }

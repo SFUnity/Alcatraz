@@ -28,7 +28,7 @@ public class Carriage extends SubsystemBase {
   public static boolean simHasAlgae = false;
   public static boolean simBeamBreak = false;
 
-  private boolean coralPassed = false;
+  public boolean coralPassed = false;
   private boolean realCoralHeld = false;
   private boolean realAlgaeHeld = false;
   private boolean fullCoralHeld = false;
@@ -77,7 +77,7 @@ public class Carriage extends SubsystemBase {
     }
 
     // Leds
-    Leds.getInstance().coralHeld = coralHeld();
+    Leds.getInstance().coralPassed = coralPassed;
     Leds.getInstance().carriageAlgaeHeld = algaeHeld();
 
     // Logging
@@ -98,9 +98,7 @@ public class Carriage extends SubsystemBase {
       if (beambreakTimer.hasElapsed(beambreakDelay.get())) {
         coralPassed = true;
       }
-    } else if (beamBreak() && coralPassed && realCoralHeld) {
-      coralPassed = false;
-    }
+    } 
     if (!beamBreak() || coralPassed || realCoralHeld) {
       beambreakTimer.restart();
     }
@@ -159,7 +157,8 @@ public class Carriage extends SubsystemBase {
               realAlgaeHeld = false;
             }
             io.runVolts(-holdSpeedVolts.get());
-          } else {
+          } 
+          else {
             io.runVolts(algaeHeld() ? holdSpeedVolts.get() : 0);
           }
         })
@@ -205,8 +204,9 @@ public class Carriage extends SubsystemBase {
     return Commands.either(
             run(() -> io.runVolts(placeSpeedVolts.get())),
             run(() -> io.runVolts(intakingSpeedVolts.get()))
-                .until(this::coralHeld)
+                .until(() -> coralPassed)
                 .andThen(
+                    run(() -> io.runVolts(-backwardsIntakeSpeedVolts.get())).until(() -> !beamBreak()),
                     run(() -> io.runVolts(backwardsIntakeSpeedVolts.get()))
                         .until(() -> beamBreak()))
                 .onlyIf(() -> !coralHeld()),
