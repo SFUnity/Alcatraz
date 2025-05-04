@@ -1,9 +1,9 @@
-package frc.robot.subsystems.apriltagvision;
+package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 
-public class AprilTagVisionConstants {
+public class VisionConstants {
   public static final double fieldBorderMargin = 0.2; // meters
 
   // AprilTag layout
@@ -44,14 +44,20 @@ public class AprilTagVisionConstants {
     }
   }
 
+  // TODO maybe make different pipelines for each camera? they might not all have the same
+  // eventually.
   public static enum Pipelines {
-    // TODO Add more pipelines
-    HUMAN_MADE;
+    // TODO Add more pipelines, rename them to these names
+    APRILTAG,
+    OBJ_DETECTION;
 
+    // TODO check to make sure that these are the correct order for the pipeline
     public static int getIndexFor(Pipelines pipeline) {
       switch (pipeline) {
-        case HUMAN_MADE:
+        case APRILTAG:
           return 0;
+        case OBJ_DETECTION:
+          return 1;
         default:
           return 0;
       }

@@ -1,19 +1,19 @@
-package frc.robot.subsystems.apriltagvision;
+package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 import static frc.robot.util.LimelightHelpers.*;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.Pipelines;
+import frc.robot.subsystems.vision.VisionConstants.Pipelines;
 import frc.robot.util.LimelightHelpers.PoseEstimate;
 import frc.robot.util.PoseManager;
 import java.util.HashSet;
 import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 
-public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
+public class VisionIOLimelight implements VisionIO {
   private String name;
 
   private static final double disconnectedTimeout = 250;
@@ -23,7 +23,7 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
   private final double DEFAUlT_CROP = 0.9;
   // private final double CROP_BUFFER = 0.1;
 
-  public AprilTagVisionIOLimelight(String camName) {
+  public VisionIOLimelight(String camName) {
     name = camName;
 
     disconnectedAlert = new Alert("No data from: " + name, AlertType.kError);
@@ -95,6 +95,12 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
   }
 
   @Override
+  public void updateInputs(ObjectDetectionVisionIOInputs inputs) {
+      // TODO Auto-generated method stub
+      VisionIO.super.updateInputs(inputs);
+  }
+
+  @Override
   public void setPipeline(int pipelineIndex) {
     setPipelineIndex(name, pipelineIndex);
   }
@@ -145,5 +151,10 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public double getPipelineIndex() {
+    return getCurrentPipelineIndex(name);
   }
 }

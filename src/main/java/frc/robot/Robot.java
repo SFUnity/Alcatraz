@@ -18,10 +18,10 @@ import static frc.robot.RobotCommands.*;
 import static frc.robot.RobotCommands.IntakeState.*;
 import static frc.robot.RobotCommands.ScoreState.*;
 import static frc.robot.constantsGlobal.FieldConstants.*;
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.leftName;
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.rightName;
 import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.*;
 import static frc.robot.subsystems.intake.IntakeConstants.groundAlgae;
+import static frc.robot.subsystems.vision.VisionConstants.leftName;
+import static frc.robot.subsystems.vision.VisionConstants.rightName;
 import static frc.robot.util.AllianceFlipUtil.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -42,9 +42,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constantsGlobal.BuildConstants;
 import frc.robot.constantsGlobal.Constants;
-import frc.robot.subsystems.apriltagvision.AprilTagVision;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIOLimelight;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.carriage.CarriageIO;
 import frc.robot.subsystems.carriage.CarriageIOSim;
@@ -69,6 +66,9 @@ import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkMax;
 import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.PoseManager;
 import frc.robot.util.VirtualSubsystem;
@@ -121,7 +121,7 @@ public class Robot extends LoggedRobot {
   private final Carriage carriage;
   private final Intake intake;
   private final Funnel funnel;
-  private final AprilTagVision vision;
+  private final Vision vision;
 
   // Non-subsystems
   private final PoseManager poseManager = new PoseManager();
@@ -234,10 +234,8 @@ public class Robot extends LoggedRobot {
         intake = new Intake(new IntakeIOSparkMax());
         funnel = new Funnel(new FunnelIOSparkMax());
         vision =
-            new AprilTagVision(
-                poseManager,
-                new AprilTagVisionIOLimelight(leftName),
-                new AprilTagVisionIOLimelight(rightName));
+            new Vision(
+                poseManager, new VisionIOLimelight(leftName), new VisionIOLimelight(rightName));
         break;
 
       case SIM:
@@ -255,8 +253,7 @@ public class Robot extends LoggedRobot {
         carriage = new Carriage(new CarriageIOSim());
         intake = new Intake(new IntakeIOSim());
         funnel = new Funnel(new FunnelIOSim());
-        vision =
-            new AprilTagVision(poseManager, new AprilTagVisionIO() {}, new AprilTagVisionIO() {});
+        vision = new Vision(poseManager, new VisionIO() {}, new VisionIO() {});
         break;
 
       default:
@@ -275,15 +272,15 @@ public class Robot extends LoggedRobot {
         intake = new Intake(new IntakeIO() {});
         funnel = new Funnel(new FunnelIO() {});
         vision =
-            new AprilTagVision(
+            new Vision(
                 poseManager,
-                new AprilTagVisionIO() {
+                new VisionIO() {
                   @Override
                   public String getName() {
                     return leftName;
                   }
                 },
-                new AprilTagVisionIO() {
+                new VisionIO() {
                   @Override
                   public String getName() {
                     return rightName;
