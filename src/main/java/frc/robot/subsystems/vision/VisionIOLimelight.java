@@ -11,7 +11,10 @@ import frc.robot.util.LimelightHelpers.PoseEstimate;
 import frc.robot.util.PoseManager;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 import org.littletonrobotics.junction.Logger;
+
 
 public class VisionIOLimelight implements VisionIO {
   private String name;
@@ -96,17 +99,37 @@ public class VisionIOLimelight implements VisionIO {
 
   @Override
   public void updateInputs(ObjectDetectionVisionIOInputs inputs, PoseManager poseManager) {
-    RawDetection[] detections = LimelightHelpers.getRawDetections("");
-    for (RawDetection detection : detections) {
-      int classID = detection.classId;
-      double txnc = detection.txnc;
-      double tync = detection.tync;
-      double ta = detection.ta;
-      // Access corner coordinates if needed
-      double corner0X = detection.corner0_X;
-      double corner0Y = detection.corner0_Y;
-        // ... corners 1-3 available similarly
-}
+    inputs.detections = LimelightHelpers.getRawDetections("");
+  
+    LinkedList<RawDetection> coral = new LinkedList<>();
+    LinkedList<RawDetection> algae = new LinkedList<>();
+
+    for (RawDetection detection : inputs.detections) {
+      //TODO check what each class number corresponds to
+      switch(detection.classID){
+        case 0:
+          coral.add(detection);
+          inputs.coralCount++;
+          break;
+        case 1:
+          algae.add(detection);
+          inputs.algaeCount++;
+          break;
+      }
+
+    }
+
+    inputs.corals = new RawDetection[coral.size()];
+    int i = 0;
+    for (RawDetection detection : coral) {
+      inputs.corals[i++] = detection;
+    }
+
+    inputs.algae = new RawDetection[algae.size()];
+    int i = 0;
+    for (RawDetection detection : algae) {
+      inputs.algae[i++] = detection;
+    }
 
   }
 

@@ -21,7 +21,11 @@ public interface VisionIO {
 
   @AutoLog
   public static class ObjectDetectionVisionIOInputs {
-
+    public RawDetection[] detections = new RawDetection[0];
+    public RawDetection[] corals = new RawDetection[0];
+    public RawDetection[] algae = new RawDetection[0];
+    public int coralCount = 0;
+    public int algaeCount = 0;
   }
 
   /** Updates the set of loggable inputs for apriltags */
