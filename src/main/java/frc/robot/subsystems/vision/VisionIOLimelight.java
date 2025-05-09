@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.vision.VisionConstants.Pipelines;
-import frc.robot.util.LimelightHelpers.PoseEstimate;
 import frc.robot.util.PoseManager;
 import java.util.HashSet;
 import java.util.Set;
@@ -99,14 +98,14 @@ public class VisionIOLimelight implements VisionIO {
 
   @Override
   public void updateInputs(ObjectDetectionVisionIOInputs inputs, PoseManager poseManager) {
-    inputs.detections = LimelightHelpers.getRawDetections("");
+    inputs.detections = getRawDetections(name);
   
     LinkedList<RawDetection> coral = new LinkedList<>();
     LinkedList<RawDetection> algae = new LinkedList<>();
 
     for (RawDetection detection : inputs.detections) {
       //TODO check what each class number corresponds to
-      switch(detection.classID){
+      switch(detection.classId){
         case 0:
           coral.add(detection);
           inputs.coralCount++;
@@ -126,7 +125,7 @@ public class VisionIOLimelight implements VisionIO {
     }
 
     inputs.algae = new RawDetection[algae.size()];
-    int i = 0;
+    i = 0;
     for (RawDetection detection : algae) {
       inputs.algae[i++] = detection;
     }

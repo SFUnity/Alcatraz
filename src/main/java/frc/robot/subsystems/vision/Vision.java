@@ -159,7 +159,7 @@ public class Vision extends VirtualSubsystem {
         allRobotPosesRejected.addAll(robotPosesRejected);
 
       } else if(io[i].getPipelineIndex() == Pipelines.getIndexFor(Pipelines.OBJ_DETECTION)) {
-        
+        io[i].updateInputs(objectInputs, poseManager);
       }
     }
 

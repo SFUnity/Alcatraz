@@ -246,9 +246,9 @@ public class PoseManager {
   public LinkedList<Pose2d> algaePositions = new LinkedList<>();
 
   public Pose2d getNearestCoral() {
-    closest = coralPositions.getFirst()
+    Pose2d closest = coralPositions.getFirst();
     for(Pose2d i : coralPositions){
-      if(getDistanceTo(i) < getDistanceTO(closest)) {
+      if(getDistanceTo(i) < getDistanceTo(closest)) {
         closest = i;
       }
     }
@@ -256,7 +256,7 @@ public class PoseManager {
   }
 
   public Pose2d getNearestAlgae() {
-    closest = algaePositions.getFirst()
+    Pose2d closest = algaePositions.getFirst();
     for(Pose2d i : algaePositions){
       if(getDistanceTo(i) < getDistanceTo(closest)) {
         closest = i;
@@ -286,12 +286,12 @@ public class PoseManager {
   }
 
   public Pose2d getNearestCoralTo(Translation2d translation) {
-    closest = coralPositions.getFirst();
-    closestDist = translation.getDistance(closest.getTranslation());
+    Pose2d closest = coralPositions.getFirst();
+    double closestDist = translation.getDistance(closest.getTranslation());
     for(Pose2d i : coralPositions){
-      if(translation.getDistance(i.getTranslation) < closestDist) {
+      if(translation.getDistance(i.getTranslation()) < closestDist) {
         closest = i;
-        closestDist = translation.getDistance(i.getTranslation);
+        closestDist = translation.getDistance(i.getTranslation());
       }
     }
     return closest;
@@ -302,12 +302,12 @@ public class PoseManager {
   }
 
   public Pose2d getNearestAlgaeTo(Translation2d translation) {
-    closest = algaePositions.getFirst();
-    closestDist = translation.getDistance(closest.getTranslation());
+    Pose2d closest = algaePositions.getFirst();
+    double closestDist = translation.getDistance(closest.getTranslation());
     for(Pose2d i : algaePositions){
-      if(translation.getDistance(i.getTranslation) < closestDist) {
+      if(translation.getDistance(i.getTranslation()) < closestDist) {
         closest = i;
-        closestDist = translation.getDistance(i.getTranslation);
+        closestDist = translation.getDistance(i.getTranslation());
       }
     }
     return closest;
