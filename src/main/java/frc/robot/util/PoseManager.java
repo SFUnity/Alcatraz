@@ -19,10 +19,9 @@ import frc.robot.RobotCommands.ScoreState;
 import frc.robot.constantsGlobal.FieldConstants.CoralStation;
 import frc.robot.constantsGlobal.FieldConstants.Face;
 import frc.robot.subsystems.drive.DriveConstants;
+import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.List;
-import java.util.LinkedList;
 import org.littletonrobotics.junction.AutoLogOutput;
 
 public class PoseManager {
@@ -247,8 +246,8 @@ public class PoseManager {
 
   public Pose2d getNearestCoral() {
     Pose2d closest = coralPositions.getFirst();
-    for(Pose2d i : coralPositions){
-      if(getDistanceTo(i) < getDistanceTo(closest)) {
+    for (Pose2d i : coralPositions) {
+      if (getDistanceTo(i) < getDistanceTo(closest)) {
         closest = i;
       }
     }
@@ -257,8 +256,8 @@ public class PoseManager {
 
   public Pose2d getNearestAlgae() {
     Pose2d closest = algaePositions.getFirst();
-    for(Pose2d i : algaePositions){
-      if(getDistanceTo(i) < getDistanceTo(closest)) {
+    for (Pose2d i : algaePositions) {
+      if (getDistanceTo(i) < getDistanceTo(closest)) {
         closest = i;
       }
     }
@@ -288,8 +287,8 @@ public class PoseManager {
   public Pose2d getNearestCoralTo(Translation2d translation) {
     Pose2d closest = coralPositions.getFirst();
     double closestDist = translation.getDistance(closest.getTranslation());
-    for(Pose2d i : coralPositions){
-      if(translation.getDistance(i.getTranslation()) < closestDist) {
+    for (Pose2d i : coralPositions) {
+      if (translation.getDistance(i.getTranslation()) < closestDist) {
         closest = i;
         closestDist = translation.getDistance(i.getTranslation());
       }
@@ -304,8 +303,8 @@ public class PoseManager {
   public Pose2d getNearestAlgaeTo(Translation2d translation) {
     Pose2d closest = algaePositions.getFirst();
     double closestDist = translation.getDistance(closest.getTranslation());
-    for(Pose2d i : algaePositions){
-      if(translation.getDistance(i.getTranslation()) < closestDist) {
+    for (Pose2d i : algaePositions) {
+      if (translation.getDistance(i.getTranslation()) < closestDist) {
         closest = i;
         closestDist = translation.getDistance(i.getTranslation());
       }

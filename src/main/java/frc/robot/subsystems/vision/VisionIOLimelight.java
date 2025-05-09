@@ -9,11 +9,9 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.vision.VisionConstants.Pipelines;
 import frc.robot.util.PoseManager;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 import org.littletonrobotics.junction.Logger;
-
 
 public class VisionIOLimelight implements VisionIO {
   private String name;
@@ -99,13 +97,13 @@ public class VisionIOLimelight implements VisionIO {
   @Override
   public void updateInputs(ObjectDetectionVisionIOInputs inputs, PoseManager poseManager) {
     inputs.detections = getRawDetections(name);
-  
+
     LinkedList<RawDetection> coral = new LinkedList<>();
     LinkedList<RawDetection> algae = new LinkedList<>();
 
     for (RawDetection detection : inputs.detections) {
-      //TODO check what each class number corresponds to
-      switch(detection.classId){
+      // TODO check what each class number corresponds to
+      switch (detection.classId) {
         case 0:
           coral.add(detection);
           inputs.coralCount++;
@@ -115,7 +113,6 @@ public class VisionIOLimelight implements VisionIO {
           inputs.algaeCount++;
           break;
       }
-
     }
 
     inputs.corals = new RawDetection[coral.size()];
@@ -129,7 +126,6 @@ public class VisionIOLimelight implements VisionIO {
     for (RawDetection detection : algae) {
       inputs.algae[i++] = detection;
     }
-
   }
 
   @Override

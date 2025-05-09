@@ -63,8 +63,8 @@ public class Vision extends VirtualSubsystem {
 
     // Loop over cameras
     for (int i = 0; i < io.length; i++) {
-      
-      if(io[i].getPipelineIndex() == Pipelines.getIndexFor(Pipelines.APRILTAG)) {
+
+      if (io[i].getPipelineIndex() == Pipelines.getIndexFor(Pipelines.APRILTAG)) {
 
         io[i].updateInputs(aprilTagInputs[i], poseManager);
         Logger.processInputs("Vision/" + CamName.values()[i].name, aprilTagInputs[i]);
@@ -158,7 +158,7 @@ public class Vision extends VirtualSubsystem {
         allRobotPosesAccepted.addAll(robotPosesAccepted);
         allRobotPosesRejected.addAll(robotPosesRejected);
 
-      } else if(io[i].getPipelineIndex() == Pipelines.getIndexFor(Pipelines.OBJ_DETECTION)) {
+      } else if (io[i].getPipelineIndex() == Pipelines.getIndexFor(Pipelines.OBJ_DETECTION)) {
         io[i].updateInputs(objectInputs, poseManager);
       }
     }
