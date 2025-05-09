@@ -23,6 +23,7 @@ import org.littletonrobotics.junction.Logger;
 public class Vision extends VirtualSubsystem {
   private final VisionIO[] io;
   private final AprilTagVisionIOInputsAutoLogged[] aprilTagInputs;
+  private final ObjectDetectionVisionIOInputsAutoLogged[] objectInputs;
   private final PoseManager poseManager;
 
   public Vision(PoseManager poseManager, VisionIO... io) {
@@ -33,6 +34,11 @@ public class Vision extends VirtualSubsystem {
     this.aprilTagInputs = new AprilTagVisionIOInputsAutoLogged[io.length];
     for (int i = 0; i < aprilTagInputs.length; i++) {
       aprilTagInputs[i] = new AprilTagVisionIOInputsAutoLogged();
+    }
+
+    this.objectInputs = new ObjectDetectionVisionIOInputsAutoLogged[io.length];
+    for (int i = 0; i < objectInputs.length; i++) {
+      objectInputs[i] = new ObjectDetectionVisionIOInputsAutoLogged();
     }
 
     // Pipelines are the setting configured in the limelight software
@@ -47,6 +53,13 @@ public class Vision extends VirtualSubsystem {
     List<Pose3d> allRobotPoses = new LinkedList<>();
     List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
     List<Pose3d> allRobotPosesRejected = new LinkedList<>();
+
+    List<Pose2d> allCoralPoses = new LinkedList<>();
+    List<Pose2d> allCoralPosesAccepted = new LinkedList<>();
+    List<Pose2d> allCoralPosesRejected = new LinkedList<>();
+    List<Pose2d> allAlgaePoses = new LinkedList<>();
+    List<Pose2d> allAlgaePosesAccepted = new LinkedList<>();
+    List<Pose2d> allAlgaePosesRejected = new LinkedList<>();
 
     // Loop over cameras
     for (int i = 0; i < io.length; i++) {

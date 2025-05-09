@@ -28,7 +28,7 @@ public interface VisionIO {
   public default void updateInputs(AprilTagVisionIOInputs inputs, PoseManager poseManager) {}
 
   /** Updates the set of loggable inputs for pieces */
-  public default void updateInputs(ObjectDetectionVisionIOInputs inputs) {}
+  public default void updateInputs(ObjectDetectionVisionIOInputs inputs, PoseManager poseManager) {}
 
   /** Sets the pipeline index. */
   public default void setPipeline(int pipeline) {}

@@ -95,9 +95,19 @@ public class VisionIOLimelight implements VisionIO {
   }
 
   @Override
-  public void updateInputs(ObjectDetectionVisionIOInputs inputs) {
-      // TODO Auto-generated method stub
-      VisionIO.super.updateInputs(inputs);
+  public void updateInputs(ObjectDetectionVisionIOInputs inputs, PoseManager poseManager) {
+    RawDetection[] detections = LimelightHelpers.getRawDetections("");
+    for (RawDetection detection : detections) {
+      int classID = detection.classId;
+      double txnc = detection.txnc;
+      double tync = detection.tync;
+      double ta = detection.ta;
+      // Access corner coordinates if needed
+      double corner0X = detection.corner0_X;
+      double corner0Y = detection.corner0_Y;
+        // ... corners 1-3 available similarly
+}
+
   }
 
   @Override
