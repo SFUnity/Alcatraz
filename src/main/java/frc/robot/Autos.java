@@ -154,7 +154,7 @@ public class Autos {
     AutoTrajectory CenterWToJ;
     if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Red)
         == DriverStation.Alliance.Blue) {
-      CenterWToJ = routine.trajectory("BlueCenterPToE");
+      CenterWToJ = routine.trajectory("CenterPToE");
     } else {
       CenterWToJ = routine.trajectory("CenterPToE");
     }
