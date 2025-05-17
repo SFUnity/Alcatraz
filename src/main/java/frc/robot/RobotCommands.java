@@ -182,7 +182,7 @@ public final class RobotCommands {
     return carriage
         .intakeCoral()
         .until(carriage::coralHeld)
-        .alongWith(funnel.runRollers().until(() -> carriage.coralPassed))
+        .alongWith(funnel.runRollers().until(() -> carriage.coralHeld()))
         .withName("lowLevelCoralIntake");
   }
 
