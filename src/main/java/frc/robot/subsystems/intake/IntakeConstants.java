@@ -58,7 +58,7 @@ public class IntakeConstants {
       rollersSpeedOut = new LoggedTunableNumber("Intake/rollerSpeedVoltsOut", 4);
       l1Angle = new LoggedTunableNumber("Intake/L1Angle", 0);
     } else {
-      loweredAngle = new LoggedTunableNumber("Intake/loweredAngle", 125);
+      loweredAngle = new LoggedTunableNumber("Intake/loweredAngle", 115);
       raisedAngle = new LoggedTunableNumber("Intake/raisedAngle", 0);
       rollersSpeedIn = new LoggedTunableNumber("Intake/rollerSpeedVoltsIn", 8);
       rollersSpeedOut = new LoggedTunableNumber("Intake/rollerSpeedVoltsOut", 8);
