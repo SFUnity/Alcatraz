@@ -190,7 +190,7 @@ public class Autos {
       AutoTrajectory LToStationHigh) {
 
     // Intake when near station
-    new Trigger(() -> poseManager.nearStation(1))
+    new Trigger(() -> poseManager.nearStation(1.75))
         .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
     // When the routine begins, reset odometry and start the first trajectory
