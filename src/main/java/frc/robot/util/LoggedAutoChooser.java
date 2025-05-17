@@ -114,8 +114,8 @@ public class LoggedAutoChooser extends LoggedNetworkInput {
    * changed and update the active AutoRoutine.
    *
    * <p>The AutoRoutine can only be updated when the robot is disabled and connected to
-   * DriverStation. If the .chooser in your dashboard says {@code BAD} the {@link LoggedAutoChooser} has
-   * not responded to the selection yet and you need to disable the robot to update it.
+   * DriverStation. If the .chooser in your dashboard says {@code BAD} the {@link LoggedAutoChooser}
+   * has not responded to the selection yet and you need to disable the robot to update it.
    */
   public void periodic() {
     if (!Logger.hasReplaySource()) {
