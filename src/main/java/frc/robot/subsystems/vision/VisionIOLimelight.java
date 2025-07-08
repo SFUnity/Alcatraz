@@ -96,14 +96,19 @@ public class VisionIOLimelight implements VisionIO {
 
   @Override
   public void updateInputs(ObjectDetectionVisionIOInputs inputs, PoseManager poseManager) {
-    inputs.detections = getRawDetections(name);
+    RawDetection[] detections = getRawDetections(name);
+    inputs.detections = new double[detections.length][];
+    int i = 0;
+    for (RawDetection detection : detections) {
+      inputs.detections[i++] = detection.toDouble;
+    }
 
-    LinkedList<RawDetection> coral = new LinkedList<>();
-    LinkedList<RawDetection> algae = new LinkedList<>();
+    LinkedList<double[]> coral = new LinkedList<>();
+    LinkedList<double[]> algae = new LinkedList<>();
 
-    for (RawDetection detection : inputs.detections) {
+    for (double[] detection : inputs.detections) {
       // TODO check what each class number corresponds to
-      switch (detection.classId) {
+      switch ((int) detection[rawDetectionRef.classId]) {
         case 0:
           coral.add(detection);
           inputs.coralCount++;
@@ -115,15 +120,15 @@ public class VisionIOLimelight implements VisionIO {
       }
     }
 
-    inputs.corals = new RawDetection[coral.size()];
-    int i = 0;
-    for (RawDetection detection : coral) {
+    inputs.corals = new double[coral.size()][];
+    i = 0;
+    for (double[] detection : coral) {
       inputs.corals[i++] = detection;
     }
 
-    inputs.algae = new RawDetection[algae.size()];
+    inputs.algae = new double[algae.size()][];
     i = 0;
-    for (RawDetection detection : algae) {
+    for (double[] detection : algae) {
       inputs.algae[i++] = detection;
     }
   }

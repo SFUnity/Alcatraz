@@ -64,6 +64,7 @@ public class Vision extends VirtualSubsystem {
     // Loop over cameras
     for (int i = 0; i < io.length; i++) {
 
+      // apriltag
       if (io[i].getPipelineIndex() == Pipelines.getIndexFor(Pipelines.APRILTAG)) {
 
         io[i].updateInputs(aprilTagInputs[i], poseManager);
@@ -158,6 +159,7 @@ public class Vision extends VirtualSubsystem {
         allRobotPosesAccepted.addAll(robotPosesAccepted);
         allRobotPosesRejected.addAll(robotPosesRejected);
 
+        // Object Detection
       } else if (io[i].getPipelineIndex() == Pipelines.getIndexFor(Pipelines.OBJ_DETECTION)) {
         io[i].updateInputs(objectInputs[i], poseManager);
       }

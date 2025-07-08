@@ -22,9 +22,9 @@ public interface VisionIO {
 
   @AutoLog
   public static class ObjectDetectionVisionIOInputs {
-    public RawDetection[] detections = new RawDetection[0];
-    public RawDetection[] corals = new RawDetection[0];
-    public RawDetection[] algae = new RawDetection[0];
+    public double[][] detections = new double[][] {};
+    public double[][] corals = new double[][] {};
+    public double[][] algae = new double[][] {};
     public int coralCount = 0;
     public int algaeCount = 0;
   }
