@@ -555,8 +555,22 @@ public class Drive extends SubsystemBase {
             double distFallOff = Math.pow(Math.E, distToTarget/partialAutoFallOff.get());
 
             Rotation2d adjustedAngleError = new Rotation2d((angleError * distFallOff) / 180.0 * Math.PI);
-            Rotation2d adjustedAngle = targetPoseAngle.plus(adjustedAngleError);
-            
+            Rotation2d adjustedAngle = inputAngle.plus(adjustedAngleError);
+
+            linearVelocity.rotateBy(adjustedAngleError);
+
+            double thetaVelocity =
+                  + getAngularVelocityFromProfiledPID(adjustedAngle.getRadians());
+            if (thetaController.atGoal()) thetaVelocity = 0.0;
+
+            runVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    linearVelocity.getX(),
+                    linearVelocity.getY(),
+                    thetaVelocity,
+                    AllianceFlipUtil.shouldFlip()
+                        ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
+                        : poseManager.getRotation()));
           } else {
             double o = config.getOmegaInput();
 
