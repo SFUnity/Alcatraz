@@ -106,7 +106,7 @@ public class Robot extends LoggedRobot {
   private final Timer canInitialErrorTimer = new Timer();
   private final Timer canErrorTimer = new Timer();
 
-  private final Alert canErrorAlert = //YAY always fun
+  private final Alert canErrorAlert = // YAY always fun
       new Alert("CAN errors detected, robot may not be controllable.", AlertType.kError);
   private final Alert lowBatteryAlert =
       new Alert(

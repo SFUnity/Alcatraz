@@ -105,9 +105,9 @@ public class Drive extends SubsystemBase {
   private static final LoggedTunableNumber ffMaxRadius =
       new LoggedTunableNumber("AutoAlign/ffMaxRadius", 0.8);
 
-  private static final LoggedTunableNumber partialAutoToleranceDeg = 
+  private static final LoggedTunableNumber partialAutoToleranceDeg =
       new LoggedTunableNumber("Drive/Commands/PartialAuto/toleranceDeg", 7.5);
-  private static final LoggedTunableNumber partialAutoFallOff = 
+  private static final LoggedTunableNumber partialAutoFallOff =
       new LoggedTunableNumber("Drive/Commands/PartialAuto/fallOff", 2.0);
 
   private final ProfiledPIDController thetaController;
@@ -511,12 +511,15 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Prototype of drive that allows driver to maintain control of the robot but subtly inputs minor shifts towards goal pose
+   * Prototype of drive that allows driver to maintain control of the robot but subtly inputs minor
+   * shifts towards goal pose
+   *
    * @param goalPose
    * @return
    */
   public Command partialAutoDrice(Supplier<Pose2d> goalPose) {
-    return run(() -> {
+    return run(
+        () -> {
           updateTunables();
           updateConstraints();
 
@@ -546,21 +549,22 @@ public class Drive extends SubsystemBase {
             linearVelocity = getLinearVelocityFromJoysticks();
           }
 
-          Rotation2d inputAngle = poseManager.getHorizontalAngleTo(poseManager.getTranslation().plus(linearVelocity));
-          
+          Rotation2d inputAngle =
+              poseManager.getHorizontalAngleTo(poseManager.getTranslation().plus(linearVelocity));
+
           double angleError = inputAngle.getDegrees() - targetPoseAngle.getDegrees();
 
           if (Math.abs(angleError) < partialAutoToleranceDeg.get()) {
             double distToTarget = poseManager.getDistanceTo(targetPose);
-            double distFallOff = Math.pow(Math.E, distToTarget/partialAutoFallOff.get());
+            double distFallOff = Math.pow(Math.E, distToTarget / partialAutoFallOff.get());
 
-            Rotation2d adjustedAngleError = new Rotation2d((angleError * distFallOff) / 180.0 * Math.PI);
+            Rotation2d adjustedAngleError =
+                new Rotation2d((angleError * distFallOff) / 180.0 * Math.PI);
             Rotation2d adjustedAngle = inputAngle.plus(adjustedAngleError);
 
             linearVelocity.rotateBy(adjustedAngleError);
 
-            double thetaVelocity =
-                  + getAngularVelocityFromProfiledPID(adjustedAngle.getRadians());
+            double thetaVelocity = getAngularVelocityFromProfiledPID(adjustedAngle.getRadians());
             if (thetaController.atGoal()) thetaVelocity = 0.0;
 
             runVelocity(
@@ -576,27 +580,26 @@ public class Drive extends SubsystemBase {
 
             // Apply deadband
             double omega = MathUtil.applyDeadband(o, DEADBAND);
-  
+
             // Check for slow mode
             if (config.slowMode().getAsBoolean()) {
               omega *= config.slowTurnMultiplier().get();
             }
-  
+
             // Square values and scale to max velocity
             omega = Math.copySign(omega * omega, omega);
             omega *= maxAngularSpeedRadiansPerSec;
 
             runVelocity(
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  linearVelocity.getX(),
-                  linearVelocity.getY(),
-                  omega,
-                  AllianceFlipUtil.shouldFlip()
-                      ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
-                      : poseManager.getRotation()));
-
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    linearVelocity.getX(),
+                    linearVelocity.getY(),
+                    omega,
+                    AllianceFlipUtil.shouldFlip()
+                        ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
+                        : poseManager.getRotation()));
           }
-    });
+        });
   }
 
   /**
