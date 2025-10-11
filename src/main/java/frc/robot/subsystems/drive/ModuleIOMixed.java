@@ -296,8 +296,7 @@ public class ModuleIOMixed implements ModuleIO {
   @Override
   public void setTurnPosition(Rotation2d rotation) {
     double setpoint =
-        MathUtil.inputModulus(
-            rotation.getRadians(), turnPIDMinInput, turnPIDMaxInput);
+        MathUtil.inputModulus(rotation.getRadians(), turnPIDMinInput, turnPIDMaxInput);
     turnController.setReference(setpoint, ControlType.kPosition);
   }
 
