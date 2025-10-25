@@ -165,4 +165,22 @@ public class Autos {
 
     return routine;
   }
+
+  private AutoRoutine StanderedCoralAuto() {
+    AutoRoutine routine = factory.newRoutine("StanderedCoralAuto");
+
+    AutoTrajectory centerLeftToE = routine.trajectory("CenterLeftToE");
+    AutoTrajectory eToFeeding = routine.trajectory("EToFeeding");
+    AutoTrajectory feedingToC = routine.trajectory("FeedingToC");
+    AutoTrajectory cToCD_Algae = routine.trajectory("CToCD_Algae");
+    AutoTrajectory cD_AlgaeToFeeding = routine.trajectory("CD_AlgaeToFeeding");
+    AutoTrajectory feedingToD = routine.trajectory("FeedingToD");
+
+
+
+
+    
+
+  }
+
 }
