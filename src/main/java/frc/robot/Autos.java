@@ -143,7 +143,7 @@ public class Autos {
 
     return routine;
   }
-  
+
   private AutoRoutine alcatrazAutoRoutine() {
     AutoRoutine routine = factory.newRoutine("taxi");
 
@@ -156,7 +156,9 @@ public class Autos {
     AutoTrajectory driveToD = routine.trajectory("FeederToD");
 
     // Intake when near station
-    routine.observe(() -> poseManager.nearStation(1.75)).whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+    routine
+        .observe(() -> poseManager.nearStation(1.75))
+        .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine
