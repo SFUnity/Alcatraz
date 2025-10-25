@@ -96,6 +96,15 @@ public class Autos {
     }
   }
 
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
+  public Command getAutonomousCommand() {
+    return isChoreoAuto ? chooser.selectedCommandScheduler() : nonChoreoChooser.get();
+  }
+  
    private AutoRoutine intakeAndEjectAuto() {
     AutoRoutine routine = factory.newRoutine("taxi");
 
@@ -120,7 +129,7 @@ public class Autos {
 
     return routine;
   }
-
+  
   private AutoRoutine StraightLine() {
     AutoRoutine routine = factory.newRoutine("StraightLine");
 
