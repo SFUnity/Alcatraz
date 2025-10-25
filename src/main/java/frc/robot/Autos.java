@@ -176,12 +176,31 @@ public class Autos {
     AutoTrajectory cD_AlgaeToFeeding = routine.trajectory("CD_AlgaeToFeeding");
     AutoTrajectory feedingToD = routine.trajectory("FeedingToD");
 
-    routine.observe(() -> poseManager.nearStation(1.75)).whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+    routine
+        .observe(() -> poseManager.nearStation(1.75))
+        .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
-    routine.active().onTrue(Commands.sequence(centerLeftToE.resetOdometry(), centerLeftToE.cmd(), eToFeeding.cmd(), feedingToC.cmd(), cToCD_Algae.cmd(), cD_AlgaeToFeeding.cmd(), feedingToD.cmd()));
+    routine
+        .active()
+        .onTrue(
+            Commands.sequence(
+                centerLeftToE.resetOdometry(),
+                centerLeftToE.cmd()
+                // eToFeeding.cmd(),
+                // feedingToC.cmd(),
+                // cToCD_Algae.cmd(),
+                // cD_AlgaeToFeeding.cmd(),
+                // feedingToD.cmd()
+              ));
 
+    centerLeftToE().active().onTrue(elevator.request(L2).andThen(scoreCoral(elevator, carriage, poseManager, () -> centerLeftToE().getFinalPose().get(), centerLeftToE.active().negate()))));
+
+    
+    
+    centerLeftToE.done().onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(eToFeeding.cmd().asProxy()));
+
+    eToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(feedingToC.cmd().asProxy()));
 
     return routine;
   }
-
 }
