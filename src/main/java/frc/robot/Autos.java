@@ -10,6 +10,7 @@ import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -103,7 +104,31 @@ public class Autos {
   public Command getAutonomousCommand() {
     return isChoreoAuto ? chooser.selectedCommandScheduler() : nonChoreoChooser.get();
   }
+private AutoRoutine pickupAndScoreAuto() {
+    AutoRoutine routine = factory.newRoutine("taxi");
 
+    // Load the routine's trajectories
+    AutoTrajectory driveToMiddle = routine.trajectory("Straight Line");
+    AutoTrajectory driveToFeeder = routine.trajectory("Feeder intake");
+    AutoTrajectory driveToReef = routine.trajectory("Reef branch");
+
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine
+        .active()
+        .onTrue(
+            Commands.sequence(
+                driveToMiddle.resetOdometry(),
+                driveToMiddle.cmd(),
+                driveToFeeder.cmd(),
+                driveToReef.cmd()));
+
+    driveToMiddle.done().onTrue(rollers.eject().withTimeout(1));
+    driveToFeeder.done().onTrue(rollers.intake().withTimeout(3));
+    driveToReef.done().onTrue(rollers.eject().withTimeout(1));
+
+    return routine;
+  }
+  
   private AutoRoutine StraightLine() {
     AutoRoutine routine = factory.newRoutine("StraightLine");
 
