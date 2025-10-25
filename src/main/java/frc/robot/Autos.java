@@ -10,6 +10,7 @@ import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -120,6 +121,17 @@ public class Autos {
     AutoTrajectory Spin = routine.trajectory("Spin");
 
     routine.active().onTrue(Spin.resetOdometry().andThen(Spin.cmd()));
+
+    return routine;
+  }
+  public AutoRoutine pickupAndScoreAuto() {
+    AutoRoutine routine = factory.newRoutine("taxi");
+
+    // Load the routine's trajectories
+    AutoTrajectory driveToMiddle = routine.trajectory("Straight Line");
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry(), driveToMiddle.cmd()));
+    driveToMiddle.done().onTrue(Commands.sequence(funnel.eject().withTimeout(1)));
 
     return routine;
   }
