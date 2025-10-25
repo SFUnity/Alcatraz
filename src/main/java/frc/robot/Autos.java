@@ -2,6 +2,9 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.RobotCommands.*;
+import static frc.robot.RobotCommands.ScoreState.Dealgify;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L2;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L3;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
@@ -75,6 +78,8 @@ public class Autos {
 
     /* Set up main choreo routines */
     chooser = new LoggedAutoChooser("ChoreoChooser");
+    chooser.addRoutine("CenterToE", this::pickupAndScoreAuto);
+    chooser.addRoutine("StandardCoralAuto", this::StandardCoralAuto);
     // chooser.addRoutine("Example Auto Routine", this::exampleAutoRoutine);
 
     if (!DriverStation.isFMSAttached()) {
@@ -104,49 +109,7 @@ public class Autos {
   public Command getAutonomousCommand() {
     return isChoreoAuto ? chooser.selectedCommandScheduler() : nonChoreoChooser.get();
   }
-    /* Set up main choreo routines */
-    chooser = new LoggedAutoChooser("ChoreoChooser");
-    chooser.addRoutine("Example Auto Routine", this::pickupAndScoreAuto);
 
-    if (!DriverStation.isFMSAttached()) {
-      // Set up test choreo routines
-
-      // chooser.addRoutine("Example Auto Routine", this::exampleAutoRoutine);
-
-      // SysID & non-choreo routines
-      if (!isChoreoAuto) {
-        nonChoreoChooser.addOption("Module Turn Tuning", drive.tuneModuleTurn());
-        nonChoreoChooser.addOption("Module Drive Tuning", drive.tuneModuleDrive());
-
-        // Set up SysId routines
-        nonChoreoChooser.addOption(
-            "Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization());
-        nonChoreoChooser.addOption(
-            "Drive Simple FF Characterization", drive.feedforwardCharacterization());
-      }
-    }
-  }
-
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-  public Command getAutonomousCommand() {
-    return isChoreoAuto ? chooser.selectedCommandScheduler() : nonChoreoChooser.get();
-  }
-
-  public AutoRoutine pickupAndScoreAuto() {
-    AutoRoutine routine = factory.newRoutine("taxi");
-
-    // Load the routine's trajectories
-    AutoTrajectory driveToMiddle = routine.trajectory("straightPath"); // change straight path with whatever ur path is named
-
-    // When the routine begins, reset odometry and start the first trajectory (1)
-    routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry(), driveToMiddle.cmd()));
-
-    return routine;
-  }
   private AutoRoutine StraightLine() {
     AutoRoutine routine = factory.newRoutine("StraightLine");
 
@@ -164,6 +127,52 @@ public class Autos {
 
     routine.active().onTrue(Spin.resetOdometry().andThen(Spin.cmd()));
 
+    return routine;
+  }
+
+  public AutoRoutine pickupAndScoreAuto() {
+    AutoRoutine routine = factory.newRoutine("taxi");
+
+    // Load the routine's trajectories
+    AutoTrajectory driveToMiddle = routine.trajectory("CenterToE");
+
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry()));
+    driveToMiddle.done().onTrue(Commands.sequence(funnel.eject().withTimeout(1)));
+
+    return routine;
+  }
+  
+  private AutoRoutine StandardCoralAuto() {
+    AutoRoutine routine = factory.newRoutine("StandardCoralAuto");
+
+    AutoTrajectory CenterToE = routine.trajectory("CenterToE");
+    AutoTrajectory CToFeeding = routine.trajectory("CToFeeding");
+    AutoTrajectory EToFeeding = routine.trajectory("EToFeeding");
+    AutoTrajectory FeedingToC = routine.trajectory("FeedingToC");
+    AutoTrajectory FeedingToC2 = routine.trajectory("FeedingToC2");
+
+    routine.observe(() -> poseManager.nearStation(1.75))
+      .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+
+    routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
+
+    CenterToE.active()
+      .onTrue(
+        elevator
+          .request(L2)
+          .andThen(
+            scoreCoral(
+              elevator,
+              carriage,
+              poseManager,
+              () -> CenterToE.getFinalPose().get(),
+              CenterToE.active().negate()))
+        );
+    CenterToE.done()
+      .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
+    EToFeeding.done()
+      .onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));
     return routine;
   }
 }
