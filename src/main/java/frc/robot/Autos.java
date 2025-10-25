@@ -81,7 +81,7 @@ public class Autos {
       // Set up test choreo routines
       chooser.addRoutine("StraightLine", this::StraightLine);
       chooser.addRoutine("Spin", this::Spin);
-      chooser.addRoutine("Alcatraz Auto", this::alcatrazAutoRoutine);
+      chooser.addRoutine("Alcatraz Auto", this::StandardCoralAuto);
 
       // SysID & non-choreo routines
       if (!isChoreoAuto) {
@@ -145,7 +145,7 @@ public class Autos {
     return routine;
   }
 
-  private AutoRoutine alcatrazAutoRoutine() {
+  private AutoRoutine StandardCoralAuto() {
     AutoRoutine routine = factory.newRoutine("taxi");
 
     // Load the routine's trajectories
