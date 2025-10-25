@@ -14,6 +14,7 @@ public class IntakeConstants {
   public static final int pivotID = 15;
 
   public static final LoggedTunableNumber kP;
+  public static final LoggedTunableNumber kD;
 
   public static final boolean pivotInverted = true;
   public static final boolean rollersInverted = false;
@@ -43,9 +44,11 @@ public class IntakeConstants {
     switch (Constants.currentMode) {
       default:
         kP = new LoggedTunableNumber("Intake/kP", 0.028);
+        kD = new LoggedTunableNumber("Intake/kD", 0.028);
         break;
       case SIM:
-        kP = new LoggedTunableNumber("Intake/simkP", 0.1);
+        kP = new LoggedTunableNumber("Intake/simkP", 0.0);
+        kD = new LoggedTunableNumber("Intake/simkV", 0.0);
         break;
     }
   }

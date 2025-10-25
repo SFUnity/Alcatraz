@@ -28,7 +28,7 @@ public class IntakeIOSim implements IntakeIO {
   private double rollersAppliedVolts = 0.0;
 
   public IntakeIOSim() {
-    controller = new PIDController(kP.get(), 0.0, 0.0);
+    controller = new PIDController(kP.get(), 0.0, kD.get());
     sim.setState(minAngleRads, 0.0);
   }
 
