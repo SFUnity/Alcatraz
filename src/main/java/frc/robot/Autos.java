@@ -150,5 +150,7 @@ public class Autos {
 
     routine.observe(() -> poseManager.nearStation(1.75))
       .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+
+    return routine;
   }
 }
