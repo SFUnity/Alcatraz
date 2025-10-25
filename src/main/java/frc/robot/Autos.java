@@ -76,6 +76,7 @@ public class Autos {
     /* Set up main choreo routines */
     chooser = new LoggedAutoChooser("ChoreoChooser");
     chooser.addRoutine("CenterToE", this::pickupAndScoreAuto);
+    chooser.addRoutine("StandardCoralAuto", this::StandardCoralAuto);
     // chooser.addRoutine("Example Auto Routine", this::exampleAutoRoutine);
 
     if (!DriverStation.isFMSAttached()) {
