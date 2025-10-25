@@ -2,6 +2,9 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.RobotCommands.*;
+import static frc.robot.RobotCommands.ScoreState.Dealgify;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L2;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L3;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
@@ -132,8 +135,9 @@ public class Autos {
 
     // Load the routine's trajectories
     AutoTrajectory driveToMiddle = routine.trajectory("CenterToE");
+
     // When the routine begins, reset odometry and start the first trajectory (1)
-    routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry(), driveToMiddle.cmd()));
+    routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry()));
     driveToMiddle.done().onTrue(Commands.sequence(funnel.eject().withTimeout(1)));
 
     return routine;
@@ -151,6 +155,20 @@ public class Autos {
     routine.observe(() -> poseManager.nearStation(1.75))
       .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
+    routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
+
+    CenterToE.active()
+      .onTrue(
+        elevator
+          .request(L2)
+          .andThen(
+            scoreCoral(
+              elevator,
+              carriage,
+              poseManager,
+              () -> CenterToE.getFinalPose().get(),
+              CenterToE.active().negate()))
+        );
     return routine;
   }
 }
