@@ -169,6 +169,9 @@ public class Autos {
               () -> CenterToE.getFinalPose().get(),
               CenterToE.active().negate()))
         );
+    CenterToE.done()
+      .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToFeeding.cmd().asProxy()));
+    
     return routine;
   }
 }
