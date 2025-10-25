@@ -164,15 +164,15 @@ public class Autos {
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine
         .active()
-        .onTrue(
-            Commands.sequence(
-                drivetoE.resetOdometry(),
-                drivetoE.cmd(),
-                driveFromEToFeeder.cmd(),
-                driveToC.cmd(),
-                driveToCDAlgae.cmd(),
-                driveFromCDToFeeder.cmd(),
-                driveToD.cmd()));
+        .onTrue(drivetoE.resetOdometry().andThen(drivetoE.cmd()));
+        drivetoE.active().onTrue(elevator.request(L2).andThen(scoreCoral(elevator, carriage, poseManager, () -> drivetoE.getFinalPose().get(), drivetoE.active().negate()));
+        drivetoE.done().onTrue(waitUntil(()-> !carriage.coralHeld())).andThen(driveFromEToFeeder.cmd().asProxy()));
+        driveFromEToFeeder.done().onTrue(waitUntil(cariage::beamBreak).andThen(driveToC.cmd().asProxy));
+                driveFromEToFeeder.cmd();
+                driveToC.cmd();
+                driveToCDAlgae.cmd();
+                driveFromCDToFeeder.cmd();
+                driveToD.cmd();
     return routine;
   }
 
