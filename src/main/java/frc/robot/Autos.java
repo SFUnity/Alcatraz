@@ -10,6 +10,7 @@ import choreo.trajectory.SwerveSample;
 import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -103,7 +104,49 @@ public class Autos {
   public Command getAutonomousCommand() {
     return isChoreoAuto ? chooser.selectedCommandScheduler() : nonChoreoChooser.get();
   }
+    /* Set up main choreo routines */
+    chooser = new LoggedAutoChooser("ChoreoChooser");
+    chooser.addRoutine("Example Auto Routine", this::pickupAndScoreAuto);
 
+    if (!DriverStation.isFMSAttached()) {
+      // Set up test choreo routines
+
+      // chooser.addRoutine("Example Auto Routine", this::exampleAutoRoutine);
+
+      // SysID & non-choreo routines
+      if (!isChoreoAuto) {
+        nonChoreoChooser.addOption("Module Turn Tuning", drive.tuneModuleTurn());
+        nonChoreoChooser.addOption("Module Drive Tuning", drive.tuneModuleDrive());
+
+        // Set up SysId routines
+        nonChoreoChooser.addOption(
+            "Drive Wheel Radius Characterization", drive.wheelRadiusCharacterization());
+        nonChoreoChooser.addOption(
+            "Drive Simple FF Characterization", drive.feedforwardCharacterization());
+      }
+    }
+  }
+
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
+  public Command getAutonomousCommand() {
+    return isChoreoAuto ? chooser.selectedCommandScheduler() : nonChoreoChooser.get();
+  }
+
+  public AutoRoutine pickupAndScoreAuto() {
+    AutoRoutine routine = factory.newRoutine("taxi");
+
+    // Load the routine's trajectories
+    AutoTrajectory driveToMiddle = routine.trajectory("straightPath"); // change straight path with whatever ur path is named
+
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry(), driveToMiddle.cmd()));
+
+    return routine;
+  }
   private AutoRoutine StraightLine() {
     AutoRoutine routine = factory.newRoutine("StraightLine");
 
