@@ -140,7 +140,7 @@ public class Autos {
     driveToMiddle
         .done()
         .onTrue(
-          funnel
+            funnel
                 .eject()
                 .withTimeout(1)
                 .andThen(
@@ -150,12 +150,12 @@ public class Autos {
     driveToFeadingStation
         .done()
         .onTrue(
-          funnel.runRollers().withTimeout(1).andThen(Commands.sequence((driveToNewCoral.cmd()))));
+            funnel.runRollers().withTimeout(1).andThen(Commands.sequence((driveToNewCoral.cmd()))));
 
     driveToNewCoral
         .done()
         .onTrue(
-          funnel
+            funnel
                 .eject()
                 .withTimeout(1)
                 .andThen(Commands.sequence((driveToFeedingStationTwo.cmd()))));
