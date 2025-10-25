@@ -81,6 +81,7 @@ public class Autos {
       // Set up test choreo routines
       chooser.addRoutine("StraightLine", this::StraightLine);
       chooser.addRoutine("Spin", this::Spin);
+      chooser.addRoutine("Alcatraz Auto", this::alcatrazAutoRoutine);
 
       // SysID & non-choreo routines
       if (!isChoreoAuto) {
