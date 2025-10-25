@@ -137,4 +137,13 @@ public class Autos {
 
     return routine;
   }
+  
+  private AutoRoutine StandardCoralAuto() {
+    AutoRoutine routine = factory.newRoutine("StandardCoralAuto");
+
+    AutoTrajectory CenterWToJ = routine.trajectory("CenterWtoJ");
+
+    routine.observe(() -> poseManager.nearStation(1.75))
+      .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+  }
 }
