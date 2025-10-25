@@ -122,9 +122,9 @@ private AutoRoutine pickupAndScoreAuto() {
                 driveToFeeder.cmd(),
                 driveToReef.cmd()));
 
-    driveToMiddle.done().onTrue(rollers.eject().withTimeout(1));
-    driveToFeeder.done().onTrue(rollers.intake().withTimeout(3));
-    driveToReef.done().onTrue(rollers.eject().withTimeout(1));
+    driveToMiddle.done().onTrue(funnel.eject().withTimeout(1));
+    driveToFeeder.done().onTrue(funnel.runRollers().withTimeout(3));
+    driveToReef.done().onTrue(funnel.eject().withTimeout(1));
 
     return routine;
   }
