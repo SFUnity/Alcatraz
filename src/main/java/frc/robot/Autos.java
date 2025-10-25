@@ -170,8 +170,9 @@ public class Autos {
               CenterToE.active().negate()))
         );
     CenterToE.done()
-      .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToFeeding.cmd().asProxy()));
-    
+      .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
+    EToFeeding.done()
+      .onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));
     return routine;
   }
 }
