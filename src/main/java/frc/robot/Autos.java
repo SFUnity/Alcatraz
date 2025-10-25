@@ -182,8 +182,25 @@ public class Autos {
     driveFromEToFeeder
         .done()
         .onTrue(waitUntil(carriage::beamBreak).andThen(driveToC.cmd().asProxy()));
-    driveFromEToFeeder.cmd();
-    driveToC.cmd();
+    driveToC
+        .active()
+        .onTrue(
+            elevator
+                .request(L2)
+                .andThen(
+                    scoreCoral(
+                        elevator,
+                        carriage,
+                        poseManager,
+                        () -> driveToC.getFinalPose().get(),
+                        driveToC.active().negate())));
+    driveToC
+        .done()
+        // add the take algae or like get rid of algae command somewhere here
+        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(driveToCDAlgae.cmd().asProxy()));
+    driveFromEToFeeder
+        .done()
+        .onTrue(waitUntil(carriage::beamBreak).andThen(driveToC.cmd().asProxy()));
     driveToCDAlgae.cmd();
     driveFromCDToFeeder.cmd();
     driveToD.cmd();
