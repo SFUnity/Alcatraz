@@ -124,6 +124,7 @@ public class Autos {
 
     return routine;
   }
+  
   public AutoRoutine pickupAndScoreAuto() {
     AutoRoutine routine = factory.newRoutine("taxi");
 
