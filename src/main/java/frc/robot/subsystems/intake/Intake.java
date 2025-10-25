@@ -147,7 +147,7 @@ public class Intake extends SubsystemBase {
           lower();
           rollersIn();
         })
-        .until(this::GPHeld)
+        //.until(this::GPHeld)
         .withName("intake");
   }
 

@@ -396,7 +396,7 @@ public class Robot extends LoggedRobot {
   /** Use this method to define your button->command mappings. */
   private void configureButtonBindings() {
     boolean testDrive = false;
-    Trigger intakeTrigger = driver.rightBumper();
+    //Trigger intakeTrigger = driver.rightBumper();
 
     // Setup rumble
     new Trigger(() -> intake.GPHeld())
@@ -428,6 +428,7 @@ public class Robot extends LoggedRobot {
       driver.b().onTrue(drive.setModuleToTest(3));
       driver.start().onTrue(runOnce(() -> drive.allModules = !drive.allModules));
     } else {
+      driver.rightBumper().whileFalse(intake.intakeCmd());
       driver
           .y()
           .onTrue(drive.headingDrive(() -> Rotation2d.fromDegrees(0)).until(drive::thetaAtGoal));
@@ -452,7 +453,7 @@ public class Robot extends LoggedRobot {
     }
     driver.back().onTrue(runOnce(() -> allowAutoDrive = !allowAutoDrive).ignoringDisable(true));
 
-    intakeTrigger.whileTrue(fullIntake(drive, carriage, intake, elevator, poseManager));
+    //intakeTrigger.whileTrue(fullIntake(drive, carriage, intake, elevator, poseManager));
     driver
         .leftBumper()
         .whileTrue(
@@ -602,16 +603,16 @@ public class Robot extends LoggedRobot {
         .and(DriverStation::isTeleop)
         .onTrue(runOnce(() -> scoreState = groundAlgae.get() ? ProcessorBack : ScoreL1));
 
-    intakeTrigger
-        .or(() -> poseManager.nearStation() && allowAutoDrive)
-        .and(() -> intakeState == Source && DriverStation.isTeleop() && !carriage.algaeHeld())
-        .onTrue(
-            RobotCommands.lowLevelCoralIntake(carriage, funnel)
-                .onlyWhile(() -> intakeOK)
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // //intakeTrigger
+    //     .or(() -> poseManager.nearStation() && allowAutoDrive)
+    //     .and(() -> intakeState == Source && DriverStation.isTeleop() && !carriage.algaeHeld())
+    //     .onTrue(
+    //         RobotCommands.lowLevelCoralIntake(carriage, funnel)
+    //             .onlyWhile(() -> intakeOK)
+    //             .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
-    intakeTrigger.onFalse(
-        runOnce(() -> intakeOK = false).andThen(waitSeconds(0.1), runOnce(() -> intakeOK = true)));
+    // //intakeTrigger.onFalse(
+    //     runOnce(() -> intakeOK = false).andThen(waitSeconds(0.1), runOnce(() -> intakeOK = true)));
 
     // Sim fake gamepieces
     SmartDashboard.putData(
