@@ -142,6 +142,10 @@ public class Autos {
     AutoRoutine routine = factory.newRoutine("StandardCoralAuto");
 
     AutoTrajectory CenterToE = routine.trajectory("CenterToE");
+    AutoTrajectory CToFeeding = routine.trajectory("CToFeeding");
+    AutoTrajectory EToFeeding = routine.trajectory("EToFeeding");
+    AutoTrajectory FeedingToC = routine.trajectory("FeedingToC");
+    AutoTrajectory FeedingToC2 = routine.trajectory("FeedingToC2");
 
     routine.observe(() -> poseManager.nearStation(1.75))
       .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
