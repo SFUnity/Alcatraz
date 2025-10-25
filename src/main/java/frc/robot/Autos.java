@@ -182,6 +182,7 @@ public class Autos {
     driveFromEToFeeder
         .done()
         .onTrue(waitUntil(carriage::beamBreak).andThen(driveToC.cmd().asProxy()));
+    //start of the drive to C command after the robot goes from e to the feeder
     driveToC
         .active()
         .onTrue(
