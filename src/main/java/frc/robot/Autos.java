@@ -130,7 +130,7 @@ public class Autos {
     AutoRoutine routine = factory.newRoutine("taxi");
 
     // Load the routine's trajectories
-    AutoTrajectory driveToMiddle = routine.trajectory("Straight Line");
+    AutoTrajectory driveToMiddle = routine.trajectory("Coral");
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry(), driveToMiddle.cmd()));
     driveToMiddle.done().onTrue(Commands.sequence(funnel.eject().withTimeout(1)));
