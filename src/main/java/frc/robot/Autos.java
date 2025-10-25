@@ -143,6 +143,32 @@ public class Autos {
 
     return routine;
   }
+  
+  private AutoRoutine alcatrazAutoRoutine() {
+    AutoRoutine routine = factory.newRoutine("taxi");
+
+    // Load the routine's trajectories
+    AutoTrajectory drivetoE = routine.trajectory("CenterToE");
+    AutoTrajectory driveFromEToFeeder = routine.trajectory("EToFeeder");
+    AutoTrajectory driveToC = routine.trajectory("FeederToC");
+    AutoTrajectory driveToCDAlgae = routine.trajectory("CToCDAlgae");
+    AutoTrajectory driveFromCDToFeeder = routine.trajectory("CDAlgaeToFeeder");
+    AutoTrajectory driveToD = routine.trajectory("FeederToD");
+
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine
+        .active()
+        .onTrue(
+            Commands.sequence(
+                drivetoE.resetOdometry(),
+                drivetoE.cmd(),
+                driveFromEToFeeder.cmd(),
+                driveToC.cmd(),
+                driveToCDAlgae.cmd(),
+                driveFromCDToFeeder.cmd(),
+                driveToD.cmd()));
+    return routine;
+  }
 
   private AutoRoutine StraightLine() {
     AutoRoutine routine = factory.newRoutine("StraightLine");
