@@ -155,6 +155,9 @@ public class Autos {
     AutoTrajectory driveFromCDToFeeder = routine.trajectory("CDAlgaeToFeeder");
     AutoTrajectory driveToD = routine.trajectory("FeederToD");
 
+    // Intake when near station
+    routine.observe(() -> poseManager.nearStation(1.75)).whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine
         .active()
