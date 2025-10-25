@@ -95,7 +95,7 @@ public class Autos {
       }
     }
   }
-  
+
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -104,7 +104,7 @@ public class Autos {
   public Command getAutonomousCommand() {
     return isChoreoAuto ? chooser.selectedCommandScheduler() : nonChoreoChooser.get();
   }
-  
+
   private AutoRoutine pickupAndScoreAuto() {
     AutoRoutine routine = factory.newRoutine("taxi");
 
@@ -114,12 +114,12 @@ public class Autos {
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry(), driveToMiddle.cmd()));
 
-    driveToMiddle.done().onTrue(rollers.eject().withTimeout(1));
+    driveToMiddle.done().onTrue(funnel.eject().withTimeout(1));
 
     return routine;
   }
 
-   private AutoRoutine intakeAndEjectAuto() {
+  private AutoRoutine intakeAndEjectAuto() {
     AutoRoutine routine = factory.newRoutine("taxi");
 
     // Load the routine's trajectories
@@ -137,13 +137,13 @@ public class Autos {
                 driveToFeeder.cmd(),
                 driveToReef.cmd()));
 
-    driveToMiddle.done().onTrue(rollers.eject().withTimeout(1));
-    driveToFeeder.done().onTrue(rollers.intake().withTimeout(3));
-    driveToReef.done().onTrue(rollers.eject().withTimeout(3));
+    driveToMiddle.done().onTrue(funnel.eject().withTimeout(1));
+    driveToFeeder.done().onTrue(funnel.runRollers().withTimeout(3));
+    driveToReef.done().onTrue(funnel.eject().withTimeout(3));
 
     return routine;
   }
-  
+
   private AutoRoutine StraightLine() {
     AutoRoutine routine = factory.newRoutine("StraightLine");
 
