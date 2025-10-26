@@ -2,7 +2,6 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.RobotCommands.*;
-import static frc.robot.RobotCommands.ScoreState.Dealgify;
 import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L2;
 
 import choreo.auto.AutoFactory;
@@ -124,7 +123,7 @@ public class Autos {
     return routine;
   }
 
-private AutoRoutine intakeAndEjectAuto() {
+  private AutoRoutine intakeAndEjectAuto() {
     AutoRoutine routine = factory.newRoutine("taxi");
 
     // Load the routine's trajectories
@@ -161,16 +160,31 @@ private AutoRoutine intakeAndEjectAuto() {
     AutoTrajectory FeederToD = routine.trajectory("FeederToD");
 
     // Intake when near station
-    routine.observe(() -> poseManager.nearStation(1.75))
-      .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
-    
+    routine
+        .observe(() -> poseManager.nearStation(1.75))
+        .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
-    CenterToE.active().onTrue(elevator.request(L2).andThen(scoreCoral(elevator, carriage, poseManager, () -> CenterToE.getFinalPose().get(), CenterToE.active().negate())));
+    CenterToE.active()
+        .onTrue(
+            elevator
+                .request(L2)
+                .andThen(
+                    scoreCoral(
+                        elevator,
+                        carriage,
+                        poseManager,
+                        () -> CenterToE.getFinalPose().get(),
+                        CenterToE.active().negate())));
+    CenterToE.done()
+      .onTrue(
+        waitUntil(() -> !carriage.coralHeld())
+          .andThen(EToFeeder.cmd().asProxy()));
 
     return routine;
   }
-  
+
   private AutoRoutine StraightLine() {
     AutoRoutine routine = factory.newRoutine("StraightLine");
 
