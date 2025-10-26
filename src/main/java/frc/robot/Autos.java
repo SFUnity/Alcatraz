@@ -181,7 +181,8 @@ public class Autos {
       .onTrue(
         waitUntil(() -> !carriage.coralHeld())
           .andThen(EToFeeder.cmd().asProxy()));
-
+    EToFeeder.done()
+      .onTrue(waitUntil(carriage::beamBreak).andThen(FeederToC.cmd().asProxy()));
     return routine;
   }
 
