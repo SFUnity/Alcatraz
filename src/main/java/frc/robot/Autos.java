@@ -77,6 +77,7 @@ public class Autos {
     chooser = new LoggedAutoChooser("ChoreoChooser");
     chooser.addRoutine("Example Auto Routine", this::pickupAndScoreAuto);
     chooser.addRoutine("Intake and Eject Routine", this::intakeAndEjectAuto);
+    chooser.addRoutine("Standard Coral Routine", this::StandardCoralAuto);
     // chooser.addRoutine("Example Auto Routine", this::exampleAutoRoutine);
 
     if (!DriverStation.isFMSAttached()) {
@@ -144,6 +145,11 @@ private AutoRoutine intakeAndEjectAuto() {
     driveToReef.done().onTrue(funnel.eject().withTimeout(1));
 
     return routine;
+  }
+
+  private AutoRoutine StandardCoralAuto() {
+    AutoRoutine routine = factory.newRoutine("StandardCoralAuto");
+
   }
   
   private AutoRoutine StraightLine() {
