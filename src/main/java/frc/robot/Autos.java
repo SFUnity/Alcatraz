@@ -2,6 +2,8 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.RobotCommands.*;
+import static frc.robot.RobotCommands.ScoreState.Dealgify;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L2;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
