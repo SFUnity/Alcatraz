@@ -160,7 +160,11 @@ private AutoRoutine intakeAndEjectAuto() {
     AutoTrajectory CDToFeeder = routine.trajectory("CDToFeeder");
     AutoTrajectory FeederToD = routine.trajectory("FeederToD");
 
-
+    // Intake when near station
+    routine.observe(() -> poseManager.nearStation(1.75))
+      .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+    
+    return routine;
   }
   
   private AutoRoutine StraightLine() {
