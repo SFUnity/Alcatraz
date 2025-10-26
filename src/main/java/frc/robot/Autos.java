@@ -75,8 +75,6 @@ public class Autos {
 
     /* Set up main choreo routines */
     chooser = new LoggedAutoChooser("ChoreoChooser");
-    chooser.addRoutine("Example Auto Routine", this::pickupAndScoreAuto);
-    chooser.addRoutine("Intake and Eject Routine", this::intakeAndEjectAuto);
     // chooser.addRoutine("Example Auto Routine", this::exampleAutoRoutine);
 
     if (!DriverStation.isFMSAttached()) {
@@ -106,7 +104,22 @@ public class Autos {
   public Command getAutonomousCommand() {
     return isChoreoAuto ? chooser.selectedCommandScheduler() : nonChoreoChooser.get();
   }
-private AutoRoutine pickupAndScoreAuto() {
+
+  private AutoRoutine pickupAndScoreAuto() {
+    AutoRoutine routine = factory.newRoutine("taxi");
+
+    // Load the routine's trajectories
+    AutoTrajectory driveToMiddle = routine.trajectory("Start Path");
+
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(Commands.sequence(driveToMiddle.resetOdometry(), driveToMiddle.cmd()));
+
+    driveToMiddle.done().onTrue(funnel.eject().withTimeout(1));
+
+    return routine;
+  }
+
+private AutoRoutine intakeAndEjectAuto() {
     AutoRoutine routine = factory.newRoutine("taxi");
 
     // Load the routine's trajectories
