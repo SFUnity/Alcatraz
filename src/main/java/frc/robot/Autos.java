@@ -164,6 +164,9 @@ private AutoRoutine intakeAndEjectAuto() {
     routine.observe(() -> poseManager.nearStation(1.75))
       .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
     
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
+
     return routine;
   }
   
