@@ -150,6 +150,15 @@ private AutoRoutine intakeAndEjectAuto() {
   private AutoRoutine StandardCoralAuto() {
     AutoRoutine routine = factory.newRoutine("StandardCoralAuto");
 
+    // Load the routine's trajectories
+    AutoTrajectory CenterToE = routine.trajectory("CenterToE");
+    AutoTrajectory EToFeeder = routine.trajectory("EToFeeder");
+    AutoTrajectory FeederToC = routine.trajectory("FeederToC");
+    AutoTrajectory CToCD = routine.trajectory("CToCDAlgae");
+    AutoTrajectory CDToFeeder = routine.trajectory("CDToFeeder");
+    AutoTrajectory FeederToD = routine.trajectory("FeederToD");
+
+
   }
   
   private AutoRoutine StraightLine() {
