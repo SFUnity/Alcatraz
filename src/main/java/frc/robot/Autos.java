@@ -166,6 +166,7 @@ private AutoRoutine intakeAndEjectAuto() {
     
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
+    CenterToE.active().onTrue(elevator.request(L2).andThen(scoreCoral(elevator, carriage, poseManager, () -> CenterToE.getFinalPose().get(), CenterToE.active().negate())));
 
     return routine;
   }
