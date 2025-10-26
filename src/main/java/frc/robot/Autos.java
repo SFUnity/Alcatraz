@@ -166,8 +166,7 @@ public class Autos {
 
     // When the routine begins, reset odometry and start the first trajectory (1)
     routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
-    CenterToE
-        .active()
+    CenterToE.active()
         .onTrue(
             elevator
                 .request(L2)
@@ -178,12 +177,9 @@ public class Autos {
                         poseManager,
                         () -> CenterToE.getFinalPose().get(),
                         CenterToE.active().negate())));
-    CenterToE
-        .done()
+    CenterToE.done()
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeder.cmd().asProxy()));
-    EToFeeder
-        .done()
-        .onTrue(waitUntil(carriage::beamBreak).andThen(FeederToC.cmd().asProxy()));
+    EToFeeder.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeederToC.cmd().asProxy()));
     return routine;
   }
 
