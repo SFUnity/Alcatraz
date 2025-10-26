@@ -178,11 +178,8 @@ public class Autos {
                         () -> CenterToE.getFinalPose().get(),
                         CenterToE.active().negate())));
     CenterToE.done()
-      .onTrue(
-        waitUntil(() -> !carriage.coralHeld())
-          .andThen(EToFeeder.cmd().asProxy()));
-    EToFeeder.done()
-      .onTrue(waitUntil(carriage::beamBreak).andThen(FeederToC.cmd().asProxy()));
+        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeder.cmd().asProxy()));
+    EToFeeder.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeederToC.cmd().asProxy()));
     return routine;
   }
 
