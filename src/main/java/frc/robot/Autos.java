@@ -180,6 +180,17 @@ public class Autos {
     CenterToE.done()
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeder.cmd().asProxy()));
     EToFeeder.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeederToC.cmd().asProxy()));
+    FeederToC.active()
+        .onTrue(
+          elevator
+                .request(L2)
+                .andThen(
+                    scoreCoral(
+                        elevator,
+                        carriage,
+                        poseManager,
+                        () -> FeederToC.getFinalPose().get(),
+                        FeederToC.active().negate())));
     return routine;
   }
 
