@@ -177,12 +177,16 @@ public class Autos {
                         poseManager,
                         () -> CenterToE.getFinalPose().get(),
                         CenterToE.active().negate())));
-    CenterToE.done()
+    CenterToE
+        .done()
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeder.cmd().asProxy()));
-    EToFeeder.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeederToC.cmd().asProxy()));
-    FeederToC.active()
+    EToFeeder
+        .done()
+        .onTrue(waitUntil(carriage::beamBreak).andThen(FeederToC.cmd().asProxy()));
+    FeederToC
+        .active()
         .onTrue(
-          elevator
+            elevator
                 .request(L2)
                 .andThen(
                     scoreCoral(
@@ -191,6 +195,10 @@ public class Autos {
                         poseManager,
                         () -> FeederToC.getFinalPose().get(),
                         FeederToC.active().negate())));
+    FeederToC
+        .done()
+        // add cmd to remove algae
+        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToCD.cmd().asProxy()));
     return routine;
   }
 
