@@ -206,7 +206,18 @@ public class Autos {
     CToCD.done().onTrue(waitUntil(carriage::algaeHeld).andThen(CDToFeeder.cmd()));
     // eject algae
     CDToFeeder.active().onTrue(carriage.ejectAlgae());
-
+    CDToFeeder.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeederToD.cmd().asProxy()));
+    FeederToD.active()
+        .onTrue(
+          elevator
+              .request(L2)
+              .andThen(
+                scoreCoral(
+                  elevator, 
+                  carriage, 
+                  poseManager, 
+                  () -> FeederToD.getFinalPose().get(),
+                  FeederToD.active().negate())));
     return routine;
   }
 
