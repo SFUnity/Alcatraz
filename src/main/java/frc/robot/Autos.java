@@ -191,8 +191,22 @@ public class Autos {
                         poseManager,
                         () -> FeederToC.getFinalPose().get(),
                         FeederToC.active().negate())));
-    FeederToC.done()
-        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToCD.cmd().asProxy()));
+    FeederToC.done().onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToCD.cmd().asProxy()));
+    CToCD.cmd()
+        .andThen(
+          CDToFeeder.cmd()
+          .asProxy())
+          .andThen(
+            dealgify(
+              elevator, 
+              carriage, 
+              poseManager, 
+              () -> CToCD.getFinalPose().get(),
+              CToCD.active().negate()));
+    CToCD.done().onTrue(waitUntil(carriage::algaeHeld).andThen(CDToFeeder.cmd()));
+    // eject algae
+    CDToFeeder.active().onTrue(carriage.ejectAlgae());
+
     return routine;
   }
 
