@@ -182,7 +182,7 @@ public class Autos {
     driveFromEToFeeder
         .done()
         .onTrue(waitUntil(carriage::beamBreak).andThen(driveToC.cmd().asProxy()));
-    //start of the drive to C command after the robot goes from e to the feeder
+    // start of the drive to C command after the robot goes from e to the feeder
     driveToC
         .active()
         .onTrue(
@@ -197,21 +197,17 @@ public class Autos {
                         driveToC.active().negate())));
     driveToC
         .done()
-        // add the take algae or like get rid of algae command somewhere here
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(driveToCDAlgae.cmd().asProxy()));
-        driveToCDAlgae.cmd().andThen(driveFromCDToFeeder.cmd().asProxy());
-                    dealgify(
-                        elevator,
-                        carriage,
-                        poseManager,
-                        () -> driveToCDAlgae.getFinalPose().get(),
-                        driveToCDAlgae.active().negate());
-        driveToCDAlgae.done()
-        .onTrue(
-            waitUntil(carriage::algaeHeld)
-                .andThen(
-                    driveFromCDToFeeder.cmd()
-                        .asProxy()));
+    driveToCDAlgae.cmd().andThen(driveFromCDToFeeder.cmd().asProxy());
+    dealgify(
+        elevator,
+        carriage,
+        poseManager,
+        () -> driveToCDAlgae.getFinalPose().get(),
+        driveToCDAlgae.active().negate());
+    driveToCDAlgae
+        .done()
+        .onTrue(waitUntil(carriage::algaeHeld).andThen(driveFromCDToFeeder.cmd()));
 
     // Eject algae while driving
     driveFromCDToFeeder.active().onTrue(carriage.ejectAlgae());
