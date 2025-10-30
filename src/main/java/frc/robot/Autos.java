@@ -199,6 +199,23 @@ public class Autos {
         .done()
         // add the take algae or like get rid of algae command somewhere here
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(driveToCDAlgae.cmd().asProxy()));
+        driveToCDAlgae.cmd().andThen(driveFromCDToFeeder.cmd().asProxy());
+                    dealgify(
+                        elevator,
+                        carriage,
+                        poseManager,
+                        () -> driveToCDAlgae.getFinalPose().get(),
+                        driveToCDAlgae.active().negate());
+        driveToCDAlgae.done()
+        .onTrue(
+            waitUntil(carriage::algaeHeld)
+                .andThen(
+                    driveFromCDToFeeder.cmd()
+                        .asProxy()));
+
+    // Eject algae while driving
+    driveFromCDToFeeder.active().onTrue(carriage.ejectAlgae());
+
     // from here you need to edit names
     driveFromEToFeeder
         .done()
