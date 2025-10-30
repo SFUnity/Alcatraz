@@ -211,7 +211,9 @@ public class Autos {
     driveFromCDToFeeder.active().onTrue(carriage.ejectAlgae());
 
     // from here you need to edit names
-    driveFromCDToFeeder.done().onTrue(waitUntil(carriage::beamBreak).andThen(driveToD.cmd().asProxy()));
+    driveFromCDToFeeder
+        .done()
+        .onTrue(waitUntil(carriage::beamBreak).andThen(driveToD.cmd().asProxy()));
     driveToD
         .active()
         .onTrue(
