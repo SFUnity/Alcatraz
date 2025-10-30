@@ -205,9 +205,7 @@ public class Autos {
         poseManager,
         () -> driveToCDAlgae.getFinalPose().get(),
         driveToCDAlgae.active().negate());
-    driveToCDAlgae
-        .done()
-        .onTrue(waitUntil(carriage::algaeHeld).andThen(driveFromCDToFeeder.cmd()));
+    driveToCDAlgae.done().onTrue(waitUntil(carriage::algaeHeld).andThen(driveFromCDToFeeder.cmd()));
 
     // Eject algae while driving
     driveFromCDToFeeder.active().onTrue(carriage.ejectAlgae());
