@@ -214,9 +214,18 @@ public class Autos {
     driveFromEToFeeder
         .done()
         .onTrue(waitUntil(carriage::beamBreak).andThen(driveToC.cmd().asProxy()));
-    driveToCDAlgae.cmd();
-    driveFromCDToFeeder.cmd();
-    driveToD.cmd();
+    driveToD
+        .active()
+        .onTrue(
+            elevator
+                .request(L2)
+                .andThen(
+                    scoreCoral(
+                        elevator,
+                        carriage,
+                        poseManager,
+                        () -> driveToD.getFinalPose().get(),
+                        driveToD.active().negate())));
     return routine;
   }
 
