@@ -199,6 +199,7 @@ public class Autos {
         .done()
         // add the take algae or like get rid of algae command somewhere here
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(driveToCDAlgae.cmd().asProxy()));
+    // from here you need to edit names
     driveFromEToFeeder
         .done()
         .onTrue(waitUntil(carriage::beamBreak).andThen(driveToC.cmd().asProxy()));
