@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight;
 import frc.robot.subsystems.funnel.Funnel;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.util.AllianceFlipUtil;
@@ -260,9 +259,7 @@ public class Autos {
                         poseManager,
                         () -> centerToG.getFinalPose().get(),
                         centerToG.active().negate())));
-    centerToG
-        .done()
-        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(gToGH.cmd().asProxy()));
+    centerToG.done().onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(gToGH.cmd().asProxy()));
     gToGH
         .cmd()
         .andThen(
@@ -274,7 +271,11 @@ public class Autos {
                 gToGH.active().negate()));
     gToGH.done().onTrue(waitUntil(carriage::algaeHeld).andThen(ghToBox.cmd()));
 
-    ghToBox.done().onTrue(scoreProcessorOrL1(carriage, intake, elevator, poseManager, true, () -> allowAutoDrive));
+    ghToBox
+        .done()
+        .onTrue(
+            scoreProcessorOrL1(
+                carriage, intake, elevator, poseManager, true, () -> allowAutoDrive));
     return routine;
   }
 
