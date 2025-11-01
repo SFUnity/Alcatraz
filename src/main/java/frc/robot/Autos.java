@@ -155,7 +155,7 @@ public class Autos {
         .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
     routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
-    
+
     CenterToE.active()
         .onTrue(
             elevator
@@ -170,6 +170,7 @@ public class Autos {
     CenterToE.done()
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
     EToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));
+    FeedingToC.done().onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToFeeding.cmd().asProxy()));
     return routine;
   }
 }
