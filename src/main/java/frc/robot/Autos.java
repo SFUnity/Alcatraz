@@ -169,6 +169,10 @@ public class Autos {
                         () -> CenterToE.getFinalPose().get(),
                         CenterToE.active().negate())));
 
+    CenterToE.done()
+      .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
+    EToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));        
+
     FeedingToC.active()
         .onTrue(
             elevator
@@ -180,7 +184,10 @@ public class Autos {
                         poseManager,
                         () -> FeedingToC.getFinalPose().get(),
                         CenterToE.active().negate())));
-
+    FeedingToC.done()
+        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToFeeding.cmd().asProxy()));
+    CToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC2.cmd().asProxy()));
+    
     FeedingToC2.active()
         .onTrue(
             elevator
@@ -191,15 +198,7 @@ public class Autos {
                         carriage,
                         poseManager,
                         () -> FeedingToC.getFinalPose().get(),
-                        CenterToE.active().negate())));
-    
-                    
-    CenterToE.done()
-        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
-    EToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));
-    FeedingToC.done()
-        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToFeeding.cmd().asProxy()));
-    CToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC2.cmd().asProxy()));
+                        CenterToE.active().negate())));  
     return routine;
   }
 }
