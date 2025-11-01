@@ -198,13 +198,13 @@ public class Autos {
     driveToC
         .done()
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(driveToCDAlgae.cmd().asProxy()));
-    driveToCDAlgae.cmd().andThen(driveFromCDToFeeder.cmd().asProxy());
+    driveToCDAlgae.cmd().andThen(driveFromCDToFeeder.cmd().asProxy()).andThen(
     dealgify(
         elevator,
         carriage,
         poseManager,
         () -> driveToCDAlgae.getFinalPose().get(),
-        driveToCDAlgae.active().negate());
+        driveToCDAlgae.active().negate()));
     driveToCDAlgae.done().onTrue(waitUntil(carriage::algaeHeld).andThen(driveFromCDToFeeder.cmd()));
 
     // Eject algae while driving
