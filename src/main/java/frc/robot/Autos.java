@@ -237,7 +237,7 @@ public class Autos {
 
     // Load the routine's trajectories
     AutoTrajectory centerToG = routine.trajectory("CenterToG");
-
+    AutoTrajectory gToGH = routine.trajectory("GToGH");
     return routine;
   }
 
