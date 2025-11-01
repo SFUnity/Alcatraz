@@ -273,6 +273,8 @@ public class Autos {
                 () -> gToGH.getFinalPose().get(),
                 gToGH.active().negate()));
     gToGH.done().onTrue(waitUntil(carriage::algaeHeld).andThen(ghToBox.cmd()));
+
+    ghToBox.done().onTrue(scoreProcessorOrL1(carriage, intake, elevator, poseManager, true, () -> allowAutoDrive));
     return routine;
   }
 
