@@ -242,8 +242,17 @@ public class Autos {
 
     cD_AlgaeToFeeding.active().onTrue(waitSeconds(1).andThen(carriage.ejectAlgae()));
 
-    cD_AlgaeToFeeding.active().onTrue(carriage.ejectAlgae());
+    cD_AlgaeToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(feedingToD.cmd().asProxy()));
 
+    feedingToD.active().onTrue(elevator
+    .request(L3)
+    .andThen(
+        scoreCoral(
+            elevator,
+            carriage,
+            poseManager,
+            () -> feedingToD.getFinalPose().get(),
+            feedingToD.active().negate())));
 
     return routine;
   }
