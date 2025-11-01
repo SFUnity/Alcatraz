@@ -155,6 +155,7 @@ public class Autos {
         .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
     routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
+    routine.active().onTrue(CToFeeding.resetOdometry().andThen(CToFeeding.cmd()));
 
     CenterToE.active()
         .onTrue(
