@@ -213,7 +213,6 @@ public class Autos {
     // Eject algae while driving
     driveFromCDToFeeder.active().onTrue(carriage.ejectAlgae());
 
-    // from here you need to edit names
     driveFromCDToFeeder
         .done()
         .onTrue(waitUntil(carriage::beamBreak).andThen(driveToD.cmd().asProxy()));
