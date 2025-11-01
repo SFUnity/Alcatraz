@@ -240,7 +240,37 @@ public class Autos {
     AutoTrajectory gToGH = routine.trajectory("GToGH");
     AutoTrajectory ghToBox = routine.trajectory("GHToBox");
 
-    
+    routine
+        .observe(() -> poseManager.nearStation(1.75))
+        .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+
+    // When the routine begins, reset odometry and start the first trajectory (1)
+    routine.active().onTrue(centerToG.resetOdometry().andThen(centerToG.cmd()));
+    centerToG
+        .active()
+        .onTrue(
+            elevator
+                .request(L2)
+                .andThen(
+                    scoreCoral(
+                        elevator,
+                        carriage,
+                        poseManager,
+                        () -> centerToG.getFinalPose().get(),
+                        centerToG.active().negate())));
+    centerToG
+        .done()
+        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(gToGH.cmd().asProxy()));
+    gToGH
+        .cmd()
+        .andThen(
+            dealgify(
+                elevator,
+                carriage,
+                poseManager,
+                () -> gToGH.getFinalPose().get(),
+                gToGH.active().negate()));
+    gToGH.done().onTrue(waitUntil(carriage::algaeHeld).andThen(ghToBox.cmd()));
     return routine;
   }
 
