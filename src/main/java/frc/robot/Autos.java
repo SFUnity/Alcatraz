@@ -3,6 +3,7 @@ package frc.robot;
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.RobotCommands.*;
 import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L2;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L3;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight;
 import frc.robot.subsystems.funnel.Funnel;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.util.AllianceFlipUtil;
@@ -188,7 +190,7 @@ public class Autos {
         .active()
         .onTrue(
             elevator
-                .request(L2)
+                .request(L3)
                 .andThen(
                     scoreCoral(
                         elevator,
@@ -221,7 +223,7 @@ public class Autos {
         .active()
         .onTrue(
             elevator
-                .request(L2)
+                .request(L3)
                 .andThen(
                     scoreCoral(
                         elevator,
@@ -250,7 +252,7 @@ public class Autos {
         .active()
         .onTrue(
             elevator
-                .request(L2)
+                .request(L3)
                 .andThen(
                     scoreCoral(
                         elevator,
