@@ -2,7 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.RobotCommands.*;
-import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L2;
+import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.*;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
@@ -212,13 +212,23 @@ public class Autos {
 
     eToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(feedingToC.cmd().asProxy()));
 
+    feedingToC
+        .active()
+        .onTrue(
+            elevator
+                .request(L3)
+                .andThen(
+                    scoreCoral(
+                        elevator,
+                        carriage,
+                        poseManager,
+                        () -> feedingToC.getFinalPose().get(),
+                        feedingToC.active().negate())));
+    
 
-    feedingToC.active().onTrue(elevator.request(L2).andThen(scoreCoral(
-      elevator,
-      carriage,
-      poseManager,
-      () -> centerLeftToE.getFinalPose().get(),
-      centerLeftToE.active().negate())));
+    feedingToC.done().onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(cToCD_Algae.cmd().asProxy()));
+    cToCD_Algae.active().onTrue(dealgify(elevator, carriage, poseManager, () -> cToCD_Algae.getFinalPose().get(), cToCD_Algae.active().negate()));
+    cToCD_Algae.done().onTrue(waitUntil(() -> !carriage.algaeHeld()).andThen(cD_AlgaeToFeeding.cmd().asProxy()));
 
     return routine;
   }
