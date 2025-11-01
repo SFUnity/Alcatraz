@@ -2,9 +2,7 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.RobotCommands.*;
-import static frc.robot.RobotCommands.ScoreState.Dealgify;
 import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L2;
-import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.L3;
 
 import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
@@ -142,7 +140,7 @@ public class Autos {
 
     return routine;
   }
-  
+
   private AutoRoutine StandardCoralAuto() {
     AutoRoutine routine = factory.newRoutine("StandardCoralAuto");
 
@@ -152,27 +150,26 @@ public class Autos {
     AutoTrajectory FeedingToC = routine.trajectory("FeedingToC");
     AutoTrajectory FeedingToC2 = routine.trajectory("FeedingToC2");
 
-    routine.observe(() -> poseManager.nearStation(1.75))
-      .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+    routine
+        .observe(() -> poseManager.nearStation(1.75))
+        .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
     routine.active().onTrue(CenterToE.resetOdometry().andThen(CenterToE.cmd()));
 
     CenterToE.active()
-      .onTrue(
-        elevator
-          .request(L2)
-          .andThen(
-            scoreCoral(
-              elevator,
-              carriage,
-              poseManager,
-              () -> CenterToE.getFinalPose().get(),
-              CenterToE.active().negate()))
-        );
+        .onTrue(
+            elevator
+                .request(L2)
+                .andThen(
+                    scoreCoral(
+                        elevator,
+                        carriage,
+                        poseManager,
+                        () -> CenterToE.getFinalPose().get(),
+                        CenterToE.active().negate())));
     CenterToE.done()
-      .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
-    EToFeeding.done()
-      .onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));
+        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
+    EToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));
     return routine;
   }
 }
