@@ -224,16 +224,38 @@ public class Autos {
                         poseManager,
                         () -> feedingToC.getFinalPose().get(),
                         feedingToC.active().negate())));
-    
 
-    feedingToC.done().onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(cToCD_Algae.cmd().asProxy()));
+    feedingToC
+        .done()
+        .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(cToCD_Algae.cmd().asProxy()));
 
-    cToCD_Algae.active().onTrue(dealgify(elevator, carriage, poseManager, () -> cToCD_Algae.getFinalPose().get(), cToCD_Algae.active().negate()));
+    cToCD_Algae
+        .active()
+        .onTrue(
+            dealgify(
+                elevator,
+                carriage,
+                poseManager,
+                () -> cToCD_Algae.getFinalPose().get(),
+                cToCD_Algae.active().negate()));
 
-    cToCD_Algae.done().onTrue(waitUntil(() -> !carriage.algaeHeld()).andThen(cD_AlgaeToFeeding.cmd().asProxy()));
+    cToCD_Algae
+        .done()
+        .onTrue(waitUntil(() -> !carriage.algaeHeld()).andThen(cD_AlgaeToFeeding.cmd().asProxy()));
 
-    cD_AlgaeToFeeding.active().onTrue(carriage.ejectAlgae());
+    cD_AlgaeToFeeding.active().onTrue(waitSeconds(1).andThen(carriage.ejectAlgae()));
 
+    cD_AlgaeToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(feedingToD.cmd().asProxy()));
+
+    feedingToD.active().onTrue(elevator
+    .request(L3)
+    .andThen(
+        scoreCoral(
+            elevator,
+            carriage,
+            poseManager,
+            () -> feedingToD.getFinalPose().get(),
+            feedingToD.active().negate())));
 
     return routine;
   }
