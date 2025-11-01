@@ -615,7 +615,8 @@ public class Robot extends LoggedRobot {
 
     // Sim fake gamepieces
     SmartDashboard.putData(
-        "Toggle Coral in Carriage", runOnce(() -> Carriage.simHasCoral = !Carriage.simHasCoral).ignoringDisable(true));
+        "Toggle Coral in Carriage",
+        runOnce(() -> Carriage.simHasCoral = !Carriage.simHasCoral).ignoringDisable(true));
     SmartDashboard.putData(
         "Toggle Algae in Carriage", runOnce(() -> Carriage.simHasAlgae = !Carriage.simHasAlgae));
     SmartDashboard.putData(
