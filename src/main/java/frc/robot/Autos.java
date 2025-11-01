@@ -180,6 +180,7 @@ public class Autos {
                         poseManager,
                         () -> FeedingToC.getFinalPose().get(),
                         CenterToE.active().negate())));
+
     FeedingToC2.active()
         .onTrue(
             elevator
@@ -192,6 +193,7 @@ public class Autos {
                         () -> FeedingToC.getFinalPose().get(),
                         CenterToE.active().negate())));
     
+                    
     CenterToE.done()
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
     EToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));
