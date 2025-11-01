@@ -83,6 +83,7 @@ public class Autos {
       chooser.addRoutine("StraightLine", this::StraightLine);
       chooser.addRoutine("Spin", this::Spin);
       chooser.addRoutine("Alcatraz Auto", this::StandardCoralAuto);
+      chooser.addRoutine("Algae Scoring", this::AlgaeScoringAuto);
 
       // SysID & non-choreo routines
       if (!isChoreoAuto) {
@@ -228,6 +229,15 @@ public class Autos {
                         poseManager,
                         () -> driveToD.getFinalPose().get(),
                         driveToD.active().negate())));
+    return routine;
+  }
+
+  private AutoRoutine AlgaeScoringAuto() {
+    AutoRoutine routine = factory.newRoutine("taxi");
+
+    // Load the routine's trajectories
+    AutoTrajectory centerToG = routine.trajectory("CenterToG");
+
     return routine;
   }
 
