@@ -181,7 +181,7 @@ public class Autos {
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(driveFromEToFeeder.cmd().asProxy()));
     driveFromEToFeeder
         .done()
-        .onTrue(waitUntil(carriage::beamBreak).andThen(driveToC.cmd().asProxy()));
+        .onTrue(waitUntil(carriage::coralHeld).andThen(driveToC.cmd().asProxy()));
     // start of the drive to C command after the robot goes from e to the feeder
     driveToC
         .active()
@@ -215,7 +215,7 @@ public class Autos {
 
     driveFromCDToFeeder
         .done()
-        .onTrue(waitUntil(carriage::beamBreak).andThen(driveToD.cmd().asProxy()));
+        .onTrue(waitUntil(carriage::coralHeld).andThen(driveToD.cmd().asProxy()));
     driveToD
         .active()
         .onTrue(
