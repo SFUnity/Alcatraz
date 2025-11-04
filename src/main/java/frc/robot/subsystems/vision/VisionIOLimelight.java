@@ -1,19 +1,19 @@
-package frc.robot.subsystems.apriltagvision;
+package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 import static frc.robot.util.LimelightHelpers.*;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.Pipelines;
-import frc.robot.util.LimelightHelpers.PoseEstimate;
+import frc.robot.subsystems.vision.VisionConstants.Pipelines;
 import frc.robot.util.PoseManager;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 
-public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
+public class VisionIOLimelight implements VisionIO {
   private String name;
 
   private static final double disconnectedTimeout = 250;
@@ -23,7 +23,7 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
   private final double DEFAUlT_CROP = 0.9;
   // private final double CROP_BUFFER = 0.1;
 
-  public AprilTagVisionIOLimelight(String camName) {
+  public VisionIOLimelight(String camName) {
     name = camName;
 
     disconnectedAlert = new Alert("No data from: " + name, AlertType.kError);
@@ -95,6 +95,45 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
   }
 
   @Override
+  public void updateInputs(ObjectDetectionVisionIOInputs inputs, PoseManager poseManager) {
+    RawDetection[] detections = getRawDetections(name);
+    inputs.detections = new double[detections.length][];
+    int i = 0;
+    for (RawDetection detection : detections) {
+      inputs.detections[i++] = detection.toDouble;
+    }
+
+    LinkedList<double[]> coral = new LinkedList<>();
+    LinkedList<double[]> algae = new LinkedList<>();
+
+    for (double[] detection : inputs.detections) {
+      // TODO check what each class number corresponds to
+      switch ((int) detection[rawDetectionRef.classId]) {
+        case 0:
+          coral.add(detection);
+          inputs.coralCount++;
+          break;
+        case 1:
+          algae.add(detection);
+          inputs.algaeCount++;
+          break;
+      }
+    }
+
+    inputs.corals = new double[coral.size()][];
+    i = 0;
+    for (double[] detection : coral) {
+      inputs.corals[i++] = detection;
+    }
+
+    inputs.algae = new double[algae.size()][];
+    i = 0;
+    for (double[] detection : algae) {
+      inputs.algae[i++] = detection;
+    }
+  }
+
+  @Override
   public void setPipeline(int pipelineIndex) {
     setPipelineIndex(name, pipelineIndex);
   }
@@ -145,5 +184,10 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public double getPipelineIndex() {
+    return getCurrentPipelineIndex(name);
   }
 }

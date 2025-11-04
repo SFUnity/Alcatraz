@@ -1,9 +1,9 @@
-package frc.robot.subsystems.apriltagvision;
+package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 
-public class AprilTagVisionConstants {
+public class VisionConstants {
   public static final double fieldBorderMargin = 0.2; // meters
 
   // AprilTag layout
@@ -44,14 +44,37 @@ public class AprilTagVisionConstants {
     }
   }
 
-  public static enum Pipelines {
-    // TODO Add more pipelines
-    HUMAN_MADE;
+  // can't log rawDetection class so heres a reference so that i know what index of the double
+  // corresponds ot what
+  public static class rawDetectionRef {
+    public static int classId = 0;
+    public static int txnc = 1;
+    public static int tync = 2;
+    public static int ta = 3;
+    public static int corner0_X = 4;
+    public static int corner0_Y = 5;
+    public static int corner1_X = 6;
+    public static int corner1_Y = 7;
+    public static int corner2_X = 8;
+    public static int corner2_Y = 9;
+    public static int corner3_X = 10;
+    public static int corner3_Y = 11;
+  }
 
+  // TODO maybe make different pipelines for each camera? they might not all have the same
+  // eventually.
+  public static enum Pipelines {
+    // TODO Add more pipelines, rename them to these names
+    APRILTAG,
+    OBJ_DETECTION;
+
+    // TODO check to make sure that these are the correct order for the pipeline
     public static int getIndexFor(Pipelines pipeline) {
       switch (pipeline) {
-        case HUMAN_MADE:
+        case APRILTAG:
           return 0;
+        case OBJ_DETECTION:
+          return 1;
         default:
           return 0;
       }

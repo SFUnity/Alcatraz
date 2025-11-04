@@ -105,6 +105,11 @@ public class Drive extends SubsystemBase {
   private static final LoggedTunableNumber ffMaxRadius =
       new LoggedTunableNumber("AutoAlign/ffMaxRadius", 0.8);
 
+  private static final LoggedTunableNumber partialAutoToleranceDeg =
+      new LoggedTunableNumber("Drive/Commands/PartialAuto/toleranceDeg", 7.5);
+  private static final LoggedTunableNumber partialAutoFallOff =
+      new LoggedTunableNumber("Drive/Commands/PartialAuto/fallOff", 2.0);
+
   private final ProfiledPIDController thetaController;
   private final ProfiledPIDController linearController;
   private Translation2d lastSetpointTranslation;
@@ -517,6 +522,98 @@ public class Drive extends SubsystemBase {
             })
         .onlyWhile(() -> MathUtil.applyDeadband(config.getOmegaInput(), DEADBAND) == 0)
         .withName("Heading Drive");
+  }
+
+  /**
+   * Prototype of drive that allows driver to maintain control of the robot but subtly inputs minor
+   * shifts towards goal pose
+   *
+   * @param goalPose
+   * @return
+   */
+  public Command partialAutoDrice(Supplier<Pose2d> goalPose) {
+    return run(
+        () -> {
+          updateTunables();
+          updateConstraints();
+
+          Pose2d targetPose = goalPose.get();
+
+          Rotation2d targetPoseAngle = poseManager.getHorizontalAngleTo(targetPose);
+
+          // Get pov movement
+          double x = 0;
+          double y = 0;
+          if (config.povDownPressed()) {
+            x = povMovementSpeed.get();
+          } else if (config.povUpPressed()) {
+            x = -povMovementSpeed.get();
+          } else if (config.povLeftPressed()) {
+            y = povMovementSpeed.get();
+          } else if (config.povRightPressed()) {
+            y = -povMovementSpeed.get();
+          }
+
+          Translation2d linearVelocity;
+          if (Math.abs(x) > 0 || Math.abs(y) > 0) {
+            ChassisSpeeds speeds =
+                ChassisSpeeds.fromRobotRelativeSpeeds(x, y, 0, poseManager.rawGyroRotation);
+            linearVelocity = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+          } else {
+            linearVelocity = getLinearVelocityFromJoysticks();
+          }
+
+          Rotation2d inputAngle =
+              poseManager.getHorizontalAngleTo(poseManager.getTranslation().plus(linearVelocity));
+
+          double angleError = inputAngle.getDegrees() - targetPoseAngle.getDegrees();
+
+          if (Math.abs(angleError) < partialAutoToleranceDeg.get()) {
+            double distToTarget = poseManager.getDistanceTo(targetPose);
+            double distFallOff = Math.pow(Math.E, distToTarget / partialAutoFallOff.get());
+
+            Rotation2d adjustedAngleError =
+                new Rotation2d((angleError * distFallOff) / 180.0 * Math.PI);
+            Rotation2d adjustedAngle = inputAngle.plus(adjustedAngleError);
+
+            linearVelocity.rotateBy(adjustedAngleError);
+
+            double thetaVelocity = getAngularVelocityFromProfiledPID(adjustedAngle.getRadians());
+            if (thetaController.atGoal()) thetaVelocity = 0.0;
+
+            runVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    linearVelocity.getX(),
+                    linearVelocity.getY(),
+                    thetaVelocity,
+                    AllianceFlipUtil.shouldFlip()
+                        ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
+                        : poseManager.getRotation()));
+          } else {
+            double o = config.getOmegaInput();
+
+            // Apply deadband
+            double omega = MathUtil.applyDeadband(o, DEADBAND);
+
+            // Check for slow mode
+            if (config.slowMode().getAsBoolean()) {
+              omega *= config.slowTurnMultiplier().get();
+            }
+
+            // Square values and scale to max velocity
+            omega = Math.copySign(omega * omega, omega);
+            omega *= maxAngularSpeedRadiansPerSec;
+
+            runVelocity(
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    linearVelocity.getX(),
+                    linearVelocity.getY(),
+                    omega,
+                    AllianceFlipUtil.shouldFlip()
+                        ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
+                        : poseManager.getRotation()));
+          }
+        });
   }
 
   /**
