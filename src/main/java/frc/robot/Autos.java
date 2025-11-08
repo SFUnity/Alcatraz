@@ -167,9 +167,10 @@ public class Autos {
                         carriage,
                         poseManager,
                         () -> CenterToE.getFinalPose().get(),
-                        CenterToE.active().negate())));
-
-    CenterToE.done()
+                        CenterToE.active().negate(), carriage.coralHeld(true))));
+  
+    CenterToE
+        .done()
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(EToFeeding.cmd().asProxy()));
     EToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC.cmd().asProxy()));
 
@@ -184,7 +185,8 @@ public class Autos {
                         poseManager,
                         () -> FeedingToC.getFinalPose().get(),
                         CenterToE.active().negate())));
-    FeedingToC.done()
+    FeedingToC
+        .done()
         .onTrue(waitUntil(() -> !carriage.coralHeld()).andThen(CToFeeding.cmd().asProxy()));
     CToFeeding.done().onTrue(waitUntil(carriage::beamBreak).andThen(FeedingToC2.cmd().asProxy()));
 
