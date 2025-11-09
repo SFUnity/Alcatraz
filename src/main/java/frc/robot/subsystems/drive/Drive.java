@@ -531,7 +531,7 @@ public class Drive extends SubsystemBase {
    * @param goalPose
    * @return
    */
-  public Command partialAutoDrice(Supplier<Pose2d> goalPose) {
+  public Command partialAutoDrive(Supplier<Pose2d> goalPose) {
     return run(
         () -> {
           updateTunables();

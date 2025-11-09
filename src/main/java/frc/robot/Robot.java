@@ -500,7 +500,7 @@ public class Robot extends LoggedRobot {
                     either(
                         either(
                                 drive
-                                    .fullAutoDrive(goalPose(poseManager))
+                                    .partialAutoDrive(goalPose(poseManager))
                                     .andThen(
                                         either(
                                             drive.driveIntoWall(),
