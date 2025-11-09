@@ -438,21 +438,21 @@ public class Drive extends SubsystemBase {
           Translation2d linearVelocity = getLinearVelocityFromJoysticks();
 
           // Get pov movement
-          double x = 0;
-          double y = 0;
+          double povX = 0;
+          double povY = 0;
           if (config.povDownPressed()) {
-            x = -povMovementSpeed.get();
+            povX = -povMovementSpeed.get();
           } else if (config.povUpPressed()) {
-            x = povMovementSpeed.get();
+            povX = povMovementSpeed.get();
           } else if (config.povLeftPressed()) {
-            y = povMovementSpeed.get();
+            povY = povMovementSpeed.get();
           } else if (config.povRightPressed()) {
-            y = -povMovementSpeed.get();
+            povY = -povMovementSpeed.get();
           }
 
           // Convert to field relative speeds & send command
-          if (Math.abs(x) > 0 || Math.abs(y) > 0) {
-            runVelocity(new ChassisSpeeds(x, y, omega));
+          if (Math.abs(povX) > 0 || Math.abs(povY) > 0) {
+            runVelocity(new ChassisSpeeds(povX, povY, omega));
           } else {
             runVelocity(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
