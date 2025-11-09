@@ -88,8 +88,8 @@ public class Drive extends SubsystemBase {
       new LoggedTunableNumber("Drive/Commands/Linear/tolerance", 0.05);
   private static final LoggedTunableNumber thetaToleranceDeg =
       new LoggedTunableNumber("Drive/Commands/Theta/toleranceDeg", 2.0);
-  private static final LoggedTunableNumber partialAutoDrivekP =
-      new LoggedTunableNumber("Drive/Commands/partialAutoDrivekP", 1.0);
+  private static final LoggedTunableNumber partialAutoLinearkP =
+      new LoggedTunableNumber("Drive/Commands/partialAutoLinearkP", 1.0);
 
   private static final LoggedTunableNumber maxLinearVelocity =
       new LoggedTunableNumber("Drive/Commands/Linear - maxVelocity", Units.feetToMeters(7));
@@ -775,17 +775,31 @@ public class Drive extends SubsystemBase {
                       : poseManager.getRotation());
 
           // Send command
-          double P = 1 / (currentDistance * partialAutoDrivekP.get());
-          double finalX = manualSpeeds.vxMetersPerSecond * (1 - P) + driveVelocity.getX() * P;
-          Logger.recordOutput("Controls/partialAuto/autoX", driveVelocity.getX() * P);
-          Logger.recordOutput(
-              "Controls/partialAuto/manualX", manualSpeeds.vxMetersPerSecond * (1 - P));
-          double finalY = manualSpeeds.vyMetersPerSecond * (1 - P) + driveVelocity.getY() * P;
-          double finalTheta = manualSpeeds.omegaRadiansPerSecond * (1 - P) + thetaVelocity * P;
+          double maxDistance = 2;
+          Translation2d distance =
+              poseManager.getTranslation().minus(goalPose.get().getTranslation());
+
+          // X blending
+          double xError = Math.min(distance.getX() / partialAutoLinearkP.get(), maxDistance);
+          double xP = xError / maxDistance;
+          double manualX = manualSpeeds.vxMetersPerSecond * xP;
+          double autoX = driveVelocity.getX() * (1 - xP);
+          double finalX = manualX + autoX;
+          Logger.recordOutput("Controls/partialAuto/manualX", manualX);
+          Logger.recordOutput("Controls/partialAuto/autoX", autoX);
+
+          // Y blending
+          double yError = Math.min(distance.getY() / partialAutoLinearkP.get(), maxDistance);
+          double yP = yError / maxDistance;
+          double manualY = manualSpeeds.vyMetersPerSecond * yP;
+          double autoY = driveVelocity.getY() * (1 - yP);
+          double finalY = manualY + autoY;
+          Logger.recordOutput("Controls/partialAuto/manualY", manualY);
+          Logger.recordOutput("Controls/partialAuto/autoY", autoY);
 
           runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
-                  finalX, finalY, finalTheta, poseManager.getRotation()));
+                  finalX, finalY, thetaVelocity, poseManager.getRotation()));
         })
         .beforeStarting(() -> resetControllers(goalPose.get()));
   }
