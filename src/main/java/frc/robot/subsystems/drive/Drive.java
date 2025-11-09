@@ -778,7 +778,8 @@ public class Drive extends SubsystemBase {
           double P = 1 / (currentDistance * partialAutoDrivekP.get());
           double finalX = manualSpeeds.vxMetersPerSecond * (1 - P) + driveVelocity.getX() * P;
           Logger.recordOutput("Controls/partialAuto/autoX", driveVelocity.getX() * P);
-          Logger.recordOutput("Controls/partialAuto/manualX", manualSpeeds.vxMetersPerSecond * (1 - P));
+          Logger.recordOutput(
+              "Controls/partialAuto/manualX", manualSpeeds.vxMetersPerSecond * (1 - P));
           double finalY = manualSpeeds.vyMetersPerSecond * (1 - P) + driveVelocity.getY() * P;
           double finalTheta = manualSpeeds.omegaRadiansPerSecond * (1 - P) + thetaVelocity * P;
 
