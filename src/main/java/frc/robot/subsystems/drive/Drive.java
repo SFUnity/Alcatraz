@@ -780,7 +780,7 @@ public class Drive extends SubsystemBase {
               poseManager.getTranslation().minus(goalPose.get().getTranslation());
 
           // X blending
-          double xError = Math.min(distance.getX() / partialAutoLinearkP.get(), maxDistance);
+          double xError = Math.min(Math.abs(distance.getX()) / partialAutoLinearkP.get(), maxDistance);
           double xP = xError / maxDistance;
           double manualX = manualSpeeds.vxMetersPerSecond * xP;
           double autoX = driveVelocity.getX() * (1 - xP);
@@ -789,7 +789,7 @@ public class Drive extends SubsystemBase {
           Logger.recordOutput("Controls/partialAuto/autoX", autoX);
 
           // Y blending
-          double yError = Math.min(distance.getY() / partialAutoLinearkP.get(), maxDistance);
+          double yError = Math.min(Math.abs(distance.getY()) / partialAutoLinearkP.get(), maxDistance);
           double yP = yError / maxDistance;
           double manualY = manualSpeeds.vyMetersPerSecond * yP;
           double autoY = driveVelocity.getY() * (1 - yP);
