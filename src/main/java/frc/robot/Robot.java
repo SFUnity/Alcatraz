@@ -452,6 +452,7 @@ public class Robot extends LoggedRobot {
     intakeTrigger.whileTrue(fullIntake(drive, carriage, intake, elevator, poseManager));
     driver
         .leftBumper()
+        .and(new Trigger(() -> false))
         .whileTrue(
             select(
                     Map.of(
@@ -500,7 +501,7 @@ public class Robot extends LoggedRobot {
                     either(
                         either(
                                 drive
-                                    .partialAutoDrive(goalPose(poseManager))
+                                    .partialAutoDriveV2(goalPose(poseManager))
                                     .andThen(
                                         either(
                                             drive.driveIntoWall(),
@@ -529,6 +530,7 @@ public class Robot extends LoggedRobot {
                     })
                 .finallyDo(() -> poseManager.lockClosest = false)
                 .withName("fullScore"));
+    driver.leftBumper().whileTrue(drive.partialAutoDriveV2(goalPose(poseManager)));
 
     // Operator controls
     operator.y().onTrue(elevator.request(L3));
