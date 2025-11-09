@@ -780,20 +780,24 @@ public class Drive extends SubsystemBase {
               poseManager.getTranslation().minus(goalPose.get().getTranslation());
 
           // X blending
-          double xError = Math.min(Math.abs(distance.getX()) / partialAutoLinearkP.get(), maxDistance);
+          double xError =
+              Math.min(Math.abs(distance.getX()) / partialAutoLinearkP.get(), maxDistance);
           double xP = xError / maxDistance;
           double manualX = manualSpeeds.vxMetersPerSecond * xP;
           double autoX = driveVelocity.getX() * (1 - xP);
           double finalX = manualX + autoX;
+          Logger.recordOutput("Controls/partialAuto/xP", xP);
           Logger.recordOutput("Controls/partialAuto/manualX", manualX);
           Logger.recordOutput("Controls/partialAuto/autoX", autoX);
 
           // Y blending
-          double yError = Math.min(Math.abs(distance.getY()) / partialAutoLinearkP.get(), maxDistance);
+          double yError =
+              Math.min(Math.abs(distance.getY()) / partialAutoLinearkP.get(), maxDistance);
           double yP = yError / maxDistance;
           double manualY = manualSpeeds.vyMetersPerSecond * yP;
           double autoY = driveVelocity.getY() * (1 - yP);
           double finalY = manualY + autoY;
+          Logger.recordOutput("Controls/partialAuto/yP", yP);
           Logger.recordOutput("Controls/partialAuto/manualY", manualY);
           Logger.recordOutput("Controls/partialAuto/autoY", autoY);
 
