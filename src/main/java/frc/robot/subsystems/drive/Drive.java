@@ -578,45 +578,10 @@ public class Drive extends SubsystemBase {
 
           Pose2d targetPose = goalPose.get();
 
-          // Reset the linear controller
-          linearController.reset(
-              lastSetpointTranslation.getDistance(targetPose.getTranslation()),
-              linearController.getSetpoint().velocity);
-
-          // Calculate linear speed
-          double currentDistance = poseManager.getDistanceTo(targetPose);
-          double ffScaler =
-              MathUtil.clamp(
-                  (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
-                  0.0,
-                  0.5);
-          Logger.recordOutput(
-              "Drive/Commands/ffOut", linearController.getSetpoint().velocity * ffScaler);
-          Logger.recordOutput(
-              "Drive/Commands/pidOut", linearController.calculate(currentDistance, 0.0));
-          double driveVelocityScalar =
-              linearController.getSetpoint().velocity * ffScaler
-                  + linearController.calculate(currentDistance, 0.0);
-
-          if (linearAtGoal()) driveVelocityScalar = 0.0;
-
-          lastSetpointTranslation =
-              new Pose2d(targetPose.getTranslation(), poseManager.getHorizontalAngleTo(targetPose))
-                  .transformBy(GeomUtil.toTransform2d(linearController.getSetpoint().position, 0.0))
-                  .getTranslation();
-
-          // Calculate angle to target then transform by velocity scalar
-          Translation2d driveVelocity =
-              new Pose2d(
-                      new Translation2d(),
-                      poseManager.getTranslation().minus(targetPose.getTranslation()).getAngle())
-                  .transformBy(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
-                  .getTranslation();
+          Translation2d driveVelocity = getLinearVelocityFromProfiledPID(targetPose);
 
           // Calculate theta speed
-          double thetaVelocity =
-              thetaController.getSetpoint().velocity * ffScaler
-                  + getAngularVelocityFromProfiledPID(targetPose);
+          double thetaVelocity = getAngularVelocityFromProfiledPID(targetPose);
           if (thetaController.atGoal()) thetaVelocity = 0.0;
 
           // Send command
