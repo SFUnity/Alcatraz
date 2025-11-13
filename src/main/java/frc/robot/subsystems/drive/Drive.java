@@ -265,6 +265,8 @@ public class Drive extends SubsystemBase {
         driveKp,
         driveKd);
 
+    // Drive logic
+
     Logger.recordOutput("Drive/nitro", nitro);
     Util.logSubsystem(this, "Drive");
   }
@@ -415,28 +417,20 @@ public class Drive extends SubsystemBase {
   }
 
   // Drive Commands
+  public static enum DriveState {
+    MANUAL,
+    HEADING_CONTROL,
+    AUTO_ALIGN,
+    TRAJECTORY;
+}
 
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
    */
   public Command joystickDrive() {
     return run(() -> {
-          // Convert to doubles
-          double o = config.getOmegaInput();
-
-          // Apply deadband
-          double omega = MathUtil.applyDeadband(o, DEADBAND);
-
-          // Check for slow mode
-          if (config.slowMode().getAsBoolean()) {
-            omega *= config.slowTurnMultiplier().get();
-          }
-
-          // Square values and scale to max velocity
-          omega = Math.copySign(omega * omega, omega);
-          omega *= maxAngularSpeedRadiansPerSec;
-
-          // Get linear velocity
+          // Get velocities from joysticks
+          double omega = getAngularVelocityFromJoysticks();
           Translation2d linearVelocity = getLinearVelocityFromJoysticks();
 
           // Get pov movement
@@ -733,6 +727,25 @@ public class Drive extends SubsystemBase {
         && !config.povRightPressed();
   }
 
+  private double getAngularVelocityFromJoysticks() {
+    // Convert to doubles
+    double o = config.getOmegaInput();
+
+    // Apply deadband
+    double omega = MathUtil.applyDeadband(o, DEADBAND);
+
+    // Check for slow mode
+    if (config.slowMode().getAsBoolean()) {
+      omega *= config.slowTurnMultiplier().get();
+    }
+
+    // Square values and scale to max velocity
+    omega = Math.copySign(omega * omega, omega);
+    omega *= maxAngularSpeedRadiansPerSec;
+
+    return omega;
+  }
+  
   private Translation2d getLinearVelocityFromJoysticks() {
     // Convert to doubles
     double x = config.getXInput();
