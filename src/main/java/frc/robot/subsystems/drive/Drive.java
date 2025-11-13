@@ -473,34 +473,15 @@ public class Drive extends SubsystemBase {
           updateThetaTunables();
           updateThetaConstraints();
 
-          // Get pov movement
-          double x = 0;
-          double y = 0;
-          if (config.povDownPressed()) {
-            x = povMovementSpeed.get();
-          } else if (config.povUpPressed()) {
-            x = -povMovementSpeed.get();
-          } else if (config.povLeftPressed()) {
-            y = povMovementSpeed.get();
-          } else if (config.povRightPressed()) {
-            y = -povMovementSpeed.get();
-          }
-
-          Translation2d linearVelocity;
-          if (Math.abs(x) > 0 || Math.abs(y) > 0) {
-            ChassisSpeeds speeds =
-                ChassisSpeeds.fromRobotRelativeSpeeds(x, y, 0, poseManager.rawGyroRotation);
-            linearVelocity = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-          } else {
-            linearVelocity = getLinearVelocityFromJoysticks();
-          }
+          Translation2d linearVelocity = getLinearVelocityFromJoysticks();
+          double angularVelocity = getAngularVelocityFromProfiledPID(goalHeading.get());
 
           // Convert to field relative speeds & send command
           runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX(),
                   linearVelocity.getY(),
-                  getAngularVelocityFromProfiledPID(goalHeading.get()),
+                  angularVelocity,
                   AllianceFlipUtil.shouldFlip()
                       ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
                       : poseManager.getRotation()));
