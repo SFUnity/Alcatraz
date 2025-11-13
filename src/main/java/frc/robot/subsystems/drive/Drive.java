@@ -422,7 +422,7 @@ public class Drive extends SubsystemBase {
     HEADING_CONTROL,
     AUTO_ALIGN,
     TRAJECTORY;
-}
+  }
 
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
@@ -708,7 +708,7 @@ public class Drive extends SubsystemBase {
 
     return omega;
   }
-  
+
   private Translation2d getLinearVelocityFromJoysticks() {
     // Convert to doubles
     double x = config.getXInput();
@@ -741,8 +741,7 @@ public class Drive extends SubsystemBase {
 
   private double getAngularVelocityFromProfiledPID(Rotation2d rotation) {
     double output =
-        thetaController.calculate(
-            poseManager.getRotation().getRadians(), rotation.getRadians());
+        thetaController.calculate(poseManager.getRotation().getRadians(), rotation.getRadians());
 
     if (thetaController.atGoal()) output = 0.0;
 
@@ -751,39 +750,39 @@ public class Drive extends SubsystemBase {
   }
 
   private Translation2d getLinearVelocityFromProfiledPID(Pose2d targetPose) {
-          double currentDistance = poseManager.getDistanceTo(targetPose);
-          double ffScaler =
-              MathUtil.clamp(
-                  (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
-                  0.0,
-                  0.5);
+    double currentDistance = poseManager.getDistanceTo(targetPose);
+    double ffScaler =
+        MathUtil.clamp(
+            (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
+            0.0,
+            0.5);
 
-          // Reset the linear controller
-          linearController.reset(
-              lastSetpointTranslation.getDistance(targetPose.getTranslation()),
-              linearController.getSetpoint().velocity);
+    // Reset the linear controller
+    linearController.reset(
+        lastSetpointTranslation.getDistance(targetPose.getTranslation()),
+        linearController.getSetpoint().velocity);
 
-          // Calculate linear speed
-          double driveVelocityScalar =
-              linearController.getSetpoint().velocity * ffScaler
-                  + linearController.calculate(currentDistance, 0.0);
+    // Calculate linear speed
+    double driveVelocityScalar =
+        linearController.getSetpoint().velocity * ffScaler
+            + linearController.calculate(currentDistance, 0.0);
 
-          if (linearAtGoal()) driveVelocityScalar = 0.0;
+    if (linearAtGoal()) driveVelocityScalar = 0.0;
 
-          lastSetpointTranslation =
-              new Pose2d(targetPose.getTranslation(), poseManager.getHorizontalAngleTo(targetPose))
-                  .transformBy(GeomUtil.toTransform2d(linearController.getSetpoint().position, 0.0))
-                  .getTranslation();
+    lastSetpointTranslation =
+        new Pose2d(targetPose.getTranslation(), poseManager.getHorizontalAngleTo(targetPose))
+            .transformBy(GeomUtil.toTransform2d(linearController.getSetpoint().position, 0.0))
+            .getTranslation();
 
-          // Calculate angle to target then transform by velocity scalar
-          Translation2d driveVelocity =
-              new Pose2d(
-                      new Translation2d(),
-                      poseManager.getTranslation().minus(targetPose.getTranslation()).getAngle())
-                  .transformBy(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
-                  .getTranslation();
+    // Calculate angle to target then transform by velocity scalar
+    Translation2d driveVelocity =
+        new Pose2d(
+                new Translation2d(),
+                poseManager.getTranslation().minus(targetPose.getTranslation()).getAngle())
+            .transformBy(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
+            .getTranslation();
 
-                  return driveVelocity;
+    return driveVelocity;
   }
 
   private void updateTunables() {
