@@ -527,98 +527,6 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Prototype of drive that allows driver to maintain control of the robot but subtly inputs minor
-   * shifts towards goal pose
-   *
-   * @param goalPose
-   * @return
-   */
-  public Command partialAutoDriveV1(Supplier<Pose2d> goalPose) {
-    return run(
-        () -> {
-          updateTunables();
-          updateConstraints();
-
-          Pose2d targetPose = goalPose.get();
-
-          Rotation2d targetPoseAngle = poseManager.getHorizontalAngleTo(targetPose);
-
-          // Get pov movement
-          double x = 0;
-          double y = 0;
-          if (config.povDownPressed()) {
-            x = povMovementSpeed.get();
-          } else if (config.povUpPressed()) {
-            x = -povMovementSpeed.get();
-          } else if (config.povLeftPressed()) {
-            y = povMovementSpeed.get();
-          } else if (config.povRightPressed()) {
-            y = -povMovementSpeed.get();
-          }
-
-          Translation2d linearVelocity;
-          if (Math.abs(x) > 0 || Math.abs(y) > 0) {
-            ChassisSpeeds speeds =
-                ChassisSpeeds.fromRobotRelativeSpeeds(x, y, 0, poseManager.rawGyroRotation);
-            linearVelocity = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-          } else {
-            linearVelocity = getLinearVelocityFromJoysticks();
-          }
-
-          Rotation2d inputAngle =
-              poseManager.getHorizontalAngleTo(poseManager.getTranslation().plus(linearVelocity));
-
-          double angleError = inputAngle.getDegrees() - targetPoseAngle.getDegrees();
-
-          if (Math.abs(angleError) < partialAutoToleranceDeg.get()) {
-            double distToTarget = poseManager.getDistanceTo(targetPose);
-            double distFallOff = Math.pow(Math.E, distToTarget / partialAutoFallOff.get());
-
-            Rotation2d adjustedAngleError =
-                new Rotation2d((angleError * distFallOff) / 180.0 * Math.PI);
-            Rotation2d adjustedAngle = inputAngle.plus(adjustedAngleError);
-
-            linearVelocity.rotateBy(adjustedAngleError);
-
-            double thetaVelocity = getAngularVelocityFromProfiledPID(adjustedAngle.getRadians());
-            if (thetaController.atGoal()) thetaVelocity = 0.0;
-
-            runVelocity(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                    linearVelocity.getX(),
-                    linearVelocity.getY(),
-                    thetaVelocity,
-                    AllianceFlipUtil.shouldFlip()
-                        ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
-                        : poseManager.getRotation()));
-          } else {
-            double o = config.getOmegaInput();
-
-            // Apply deadband
-            double omega = MathUtil.applyDeadband(o, DEADBAND);
-
-            // Check for slow mode
-            if (config.slowMode().getAsBoolean()) {
-              omega *= config.slowTurnMultiplier().get();
-            }
-
-            // Square values and scale to max velocity
-            omega = Math.copySign(omega * omega, omega);
-            omega *= maxAngularSpeedRadiansPerSec;
-
-            runVelocity(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                    linearVelocity.getX(),
-                    linearVelocity.getY(),
-                    omega,
-                    AllianceFlipUtil.shouldFlip()
-                        ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
-                        : poseManager.getRotation()));
-          }
-        });
-  }
-
-  /**
    * Field relative drive command using a ProfiledPID for linear velocity and a ProfiledPID for
    * angular velocity.
    */
@@ -759,33 +667,29 @@ public class Drive extends SubsystemBase {
           Translation2d distance =
               poseManager.getTranslation().minus(goalPose.get().getTranslation());
 
-          // X blending
-          double xError =
-              Math.min(Math.abs(distance.getX()) / partialAutoLinearkP.get(), maxDistance);
-          double xP = xError / maxDistance;
-          double manualX = flippedManualLinearVelocity.getX() * xP;
-          double autoX = driveVelocity.getX() * (1 - xP);
-          double finalX = manualX + autoX;
-          Logger.recordOutput("Controls/partialAuto/xP", xP);
-          Logger.recordOutput("Controls/partialAuto/manualX", manualX);
-          Logger.recordOutput("Controls/partialAuto/autoX", autoX);
-
-          // Y blending
-          double yError =
-              Math.min(Math.abs(distance.getY()) / partialAutoLinearkP.get(), maxDistance);
-          double yP = yError / maxDistance;
-          double manualY = flippedManualLinearVelocity.getY() * yP;
-          double autoY = driveVelocity.getY() * (1 - yP);
-          double finalY = manualY + autoY;
-          Logger.recordOutput("Controls/partialAuto/yP", yP);
-          Logger.recordOutput("Controls/partialAuto/manualY", manualY);
-          Logger.recordOutput("Controls/partialAuto/autoY", autoY);
+          // Linear blending
+          double finalX = linearBlending(distance.getX(), maxDistance, flippedManualLinearVelocity.getX(), driveVelocity.getX(), "X");
+          double finalY = linearBlending(distance.getY(), maxDistance, flippedManualLinearVelocity.getY(), driveVelocity.getY(), "Y");
 
           runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   finalX, finalY, thetaVelocity, poseManager.getRotation()));
         })
         .beforeStarting(() -> resetControllers(goalPose.get()));
+  }
+
+  private double linearBlending(double distance, double maxDistance, double manualVelocity, double autoVelocity, String axis) {
+    double error =
+              Math.min(Math.abs(distance) / partialAutoLinearkP.get(), maxDistance);
+    double P = error / maxDistance;
+    double manualFinal = manualVelocity * P;
+    double autoFinal = autoVelocity * (1 - P);
+
+    // Logger.recordOutput("Controls/partialAuto/"+axis+"P", P);
+    // Logger.recordOutput("Controls/partialAuto/manual"+axis, manualFinal);
+    // Logger.recordOutput("Controls/partialAuto/auto"+axis, autoFinal);
+
+    return manualFinal + autoFinal;
   }
 
   public Command driveIntoWall() {
