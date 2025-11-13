@@ -668,8 +668,20 @@ public class Drive extends SubsystemBase {
               poseManager.getTranslation().minus(goalPose.get().getTranslation());
 
           // Linear blending
-          double finalX = linearBlending(distance.getX(), maxDistance, flippedManualLinearVelocity.getX(), driveVelocity.getX(), "X");
-          double finalY = linearBlending(distance.getY(), maxDistance, flippedManualLinearVelocity.getY(), driveVelocity.getY(), "Y");
+          double finalX =
+              linearBlending(
+                  distance.getX(),
+                  maxDistance,
+                  flippedManualLinearVelocity.getX(),
+                  driveVelocity.getX(),
+                  "X");
+          double finalY =
+              linearBlending(
+                  distance.getY(),
+                  maxDistance,
+                  flippedManualLinearVelocity.getY(),
+                  driveVelocity.getY(),
+                  "Y");
 
           runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -678,9 +690,13 @@ public class Drive extends SubsystemBase {
         .beforeStarting(() -> resetControllers(goalPose.get()));
   }
 
-  private double linearBlending(double distance, double maxDistance, double manualVelocity, double autoVelocity, String axis) {
-    double error =
-              Math.min(Math.abs(distance) / partialAutoLinearkP.get(), maxDistance);
+  private double linearBlending(
+      double distance,
+      double maxDistance,
+      double manualVelocity,
+      double autoVelocity,
+      String axis) {
+    double error = Math.min(Math.abs(distance) / partialAutoLinearkP.get(), maxDistance);
     double P = error / maxDistance;
     double manualFinal = manualVelocity * P;
     double autoFinal = autoVelocity * (1 - P);
