@@ -700,22 +700,7 @@ public class Drive extends SubsystemBase {
 
   public Command partialAutoDriveV2(Supplier<Pose2d> goalPose) {
     return run(() -> {
-          // Convert to doubles
-          double o = config.getOmegaInput();
-
-          // Apply deadband
-          double omega = MathUtil.applyDeadband(o, DEADBAND);
-
-          // Check for slow mode
-          if (config.slowMode().getAsBoolean()) {
-            omega *= config.slowTurnMultiplier().get();
-          }
-
-          // Square values and scale to max velocity
-          omega = Math.copySign(omega * omega, omega);
-          omega *= maxAngularSpeedRadiansPerSec;
-
-          // Get linear velocity
+          // Get manual linear velocity
           Translation2d manualLinearVelocity = getLinearVelocityFromJoysticks();
           Translation2d flippedManualLinearVelocity =
               AllianceFlipUtil.shouldFlip()
