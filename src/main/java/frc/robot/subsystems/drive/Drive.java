@@ -717,16 +717,10 @@ public class Drive extends SubsystemBase {
 
           // Get linear velocity
           Translation2d manualLinearVelocity = getLinearVelocityFromJoysticks();
-
-          // Manual result
-          ChassisSpeeds manualSpeeds =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  manualLinearVelocity.getX(),
-                  manualLinearVelocity.getY(),
-                  omega,
-                  AllianceFlipUtil.shouldFlip()
-                      ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
-                      : poseManager.getRotation());
+          Translation2d flippedManualLinearVelocity =
+              AllianceFlipUtil.shouldFlip()
+                  ? manualLinearVelocity.rotateBy(new Rotation2d(Math.PI))
+                  : manualLinearVelocity;
 
           // Auto-align section
           updateTunables();
@@ -784,7 +778,7 @@ public class Drive extends SubsystemBase {
           double xError =
               Math.min(Math.abs(distance.getX()) / partialAutoLinearkP.get(), maxDistance);
           double xP = xError / maxDistance;
-          double manualX = manualSpeeds.vxMetersPerSecond * xP;
+          double manualX = flippedManualLinearVelocity.getX() * xP;
           double autoX = driveVelocity.getX() * (1 - xP);
           double finalX = manualX + autoX;
           Logger.recordOutput("Controls/partialAuto/xP", xP);
@@ -795,7 +789,7 @@ public class Drive extends SubsystemBase {
           double yError =
               Math.min(Math.abs(distance.getY()) / partialAutoLinearkP.get(), maxDistance);
           double yP = yError / maxDistance;
-          double manualY = manualSpeeds.vyMetersPerSecond * yP;
+          double manualY = flippedManualLinearVelocity.getY() * yP;
           double autoY = driveVelocity.getY() * (1 - yP);
           double finalY = manualY + autoY;
           Logger.recordOutput("Controls/partialAuto/yP", yP);
