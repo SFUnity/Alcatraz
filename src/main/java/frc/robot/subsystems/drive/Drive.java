@@ -718,6 +718,17 @@ public class Drive extends SubsystemBase {
           // Get linear velocity
           Translation2d manualLinearVelocity = getLinearVelocityFromJoysticks();
 
+          // Manual result
+          ChassisSpeeds manualSpeeds =
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  manualLinearVelocity.getX(),
+                  manualLinearVelocity.getY(),
+                  omega,
+                  AllianceFlipUtil.shouldFlip()
+                      ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
+                      : poseManager.getRotation());
+
+          // Auto-align section
           updateTunables();
           updateConstraints();
 
@@ -763,16 +774,6 @@ public class Drive extends SubsystemBase {
               thetaController.getSetpoint().velocity * ffScaler
                   + getAngularVelocityFromProfiledPID(targetPose.getRotation().getRadians());
           if (thetaController.atGoal()) thetaVelocity = 0.0;
-
-          // Manual result
-          ChassisSpeeds manualSpeeds =
-              ChassisSpeeds.fromFieldRelativeSpeeds(
-                  manualLinearVelocity.getX(),
-                  manualLinearVelocity.getY(),
-                  omega,
-                  AllianceFlipUtil.shouldFlip()
-                      ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
-                      : poseManager.getRotation());
 
           // Send command
           double maxDistance = 2;
