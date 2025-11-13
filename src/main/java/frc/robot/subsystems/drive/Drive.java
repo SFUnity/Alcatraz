@@ -500,7 +500,7 @@ public class Drive extends SubsystemBase {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX(),
                   linearVelocity.getY(),
-                  getAngularVelocityFromProfiledPID(goalHeading.get().getRadians()),
+                  getAngularVelocityFromProfiledPID(goalHeading.get()),
                   AllianceFlipUtil.shouldFlip()
                       ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
                       : poseManager.getRotation()));
@@ -531,46 +531,11 @@ public class Drive extends SubsystemBase {
 
           Pose2d targetPose = goalPose.get();
 
-          // Reset the linear controller
-          linearController.reset(
-              lastSetpointTranslation.getDistance(targetPose.getTranslation()),
-              linearController.getSetpoint().velocity);
-
           // Calculate linear speed
-          double currentDistance = poseManager.getDistanceTo(targetPose);
-          double ffScaler =
-              MathUtil.clamp(
-                  (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
-                  0.0,
-                  0.5);
-          Logger.recordOutput(
-              "Drive/Commands/ffOut", linearController.getSetpoint().velocity * ffScaler);
-          Logger.recordOutput(
-              "Drive/Commands/pidOut", linearController.calculate(currentDistance, 0.0));
-          double driveVelocityScalar =
-              linearController.getSetpoint().velocity * ffScaler
-                  + linearController.calculate(currentDistance, 0.0);
-
-          if (linearAtGoal()) driveVelocityScalar = 0.0;
-
-          lastSetpointTranslation =
-              new Pose2d(targetPose.getTranslation(), poseManager.getHorizontalAngleTo(targetPose))
-                  .transformBy(GeomUtil.toTransform2d(linearController.getSetpoint().position, 0.0))
-                  .getTranslation();
-
-          // Calculate angle to target then transform by velocity scalar
-          Translation2d driveVelocity =
-              new Pose2d(
-                      new Translation2d(),
-                      poseManager.getTranslation().minus(targetPose.getTranslation()).getAngle())
-                  .transformBy(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
-                  .getTranslation();
+          Translation2d driveVelocity = getLinearVelocityFromProfiledPID(targetPose);
 
           // Calculate theta speed
-          double thetaVelocity =
-              thetaController.getSetpoint().velocity * ffScaler
-                  + getAngularVelocityFromProfiledPID(targetPose.getRotation().getRadians());
-          if (thetaController.atGoal()) thetaVelocity = 0.0;
+          double thetaVelocity = getAngularVelocityFromProfiledPID(targetPose);
 
           // Send command
           runVelocity(
@@ -581,8 +546,6 @@ public class Drive extends SubsystemBase {
                   poseManager.getRotation()));
 
           Leds.getInstance().alignedWithTarget = linearAtGoal() && thetaAtGoal();
-
-          Logger.recordOutput("Drive/Commands/Linear/currentDistance", currentDistance);
         })
         .beforeStarting(
             () -> {
@@ -653,7 +616,7 @@ public class Drive extends SubsystemBase {
           // Calculate theta speed
           double thetaVelocity =
               thetaController.getSetpoint().velocity * ffScaler
-                  + getAngularVelocityFromProfiledPID(targetPose.getRotation().getRadians());
+                  + getAngularVelocityFromProfiledPID(targetPose);
           if (thetaController.atGoal()) thetaVelocity = 0.0;
 
           // Send command
@@ -772,13 +735,55 @@ public class Drive extends SubsystemBase {
     return linearVelocity;
   }
 
-  private double getAngularVelocityFromProfiledPID(double goalHeadingRads) {
+  private double getAngularVelocityFromProfiledPID(Pose2d targetPose) {
+    return getAngularVelocityFromProfiledPID(targetPose.getRotation());
+  }
+
+  private double getAngularVelocityFromProfiledPID(Rotation2d rotation) {
     double output =
         thetaController.calculate(
-            poseManager.getPose().getRotation().getRadians(), goalHeadingRads);
+            poseManager.getRotation().getRadians(), rotation.getRadians());
+
+    if (thetaController.atGoal()) output = 0.0;
 
     Logger.recordOutput("Drive/Commands/HeadingError", thetaController.getPositionError());
     return output;
+  }
+
+  private Translation2d getLinearVelocityFromProfiledPID(Pose2d targetPose) {
+          double currentDistance = poseManager.getDistanceTo(targetPose);
+          double ffScaler =
+              MathUtil.clamp(
+                  (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
+                  0.0,
+                  0.5);
+
+          // Reset the linear controller
+          linearController.reset(
+              lastSetpointTranslation.getDistance(targetPose.getTranslation()),
+              linearController.getSetpoint().velocity);
+
+          // Calculate linear speed
+          double driveVelocityScalar =
+              linearController.getSetpoint().velocity * ffScaler
+                  + linearController.calculate(currentDistance, 0.0);
+
+          if (linearAtGoal()) driveVelocityScalar = 0.0;
+
+          lastSetpointTranslation =
+              new Pose2d(targetPose.getTranslation(), poseManager.getHorizontalAngleTo(targetPose))
+                  .transformBy(GeomUtil.toTransform2d(linearController.getSetpoint().position, 0.0))
+                  .getTranslation();
+
+          // Calculate angle to target then transform by velocity scalar
+          Translation2d driveVelocity =
+              new Pose2d(
+                      new Translation2d(),
+                      poseManager.getTranslation().minus(targetPose.getTranslation()).getAngle())
+                  .transformBy(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
+                  .getTranslation();
+
+                  return driveVelocity;
   }
 
   private void updateTunables() {
