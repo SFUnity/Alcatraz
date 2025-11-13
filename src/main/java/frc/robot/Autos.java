@@ -266,11 +266,28 @@ public class Autos {
 
   private AutoRoutine AlgaeScoringAuto() {
     AutoRoutine routine = factory.newRoutine("AlgaeScoringAuto");
-    AutoTrajectory centerLeftToE = routine.trajectory("CenterLeftToE");
-    AutoTrajectory eToFeeding = routine.trajectory("EToFeeding");
+    
+    AutoTrajectory centerToGH_Algae = routine.trajectory("CenterToGH_Algae");
+    AutoTrajectory gH_AlgaeTOScorer = routine.trajectory("GH_AlgaeToScorer");
 
+    routine
+    .observe(() -> poseManager.nearStation(1.75))
+    .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
+    routine
+        .active()
+        .onTrue(
+            Commands.sequence(
+                centerToGH_Algae.resetOdometry(), centerToGH_Algae.cmd()));
 
-
+        centerToGH_Algae.active()
+        .onTrue(
+            dealgify(
+                elevator,
+                carriage,
+                poseManager,
+                () -> centerToGH_Algae.getFinalPose().get(),
+                centerToGH_Algae.active().negate()));
+        
   }
 }
