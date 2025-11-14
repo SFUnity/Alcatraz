@@ -582,7 +582,8 @@ public class Drive extends SubsystemBase {
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   finalX, finalY, thetaVelocity, poseManager.getRotation()));
         })
-        .beforeStarting(() -> resetControllers(goalPose.get()));
+        .beforeStarting(() -> resetControllers(goalPose.get()))
+        .withName("Partial Auto Drive");
   }
 
   private double linearBlending(
