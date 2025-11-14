@@ -544,7 +544,7 @@ public class Drive extends SubsystemBase {
         .withName("Full Auto Drive");
   }
 
-  public Command partialAutoDriveV2(Supplier<Pose2d> goalPose) {
+  public Command partialAutoDrive(Supplier<Pose2d> goalPose) {
     return run(() -> {
           // Get manual linear velocity
           Translation2d manualLinearVelocity = getLinearVelocityFromJoysticks();

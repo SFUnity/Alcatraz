@@ -501,7 +501,7 @@ public class Robot extends LoggedRobot {
                     either(
                         either(
                                 drive
-                                    .partialAutoDriveV2(goalPose(poseManager))
+                                    .partialAutoDrive(goalPose(poseManager))
                                     .andThen(
                                         either(
                                             drive.driveIntoWall(),
@@ -530,7 +530,7 @@ public class Robot extends LoggedRobot {
                     })
                 .finallyDo(() -> poseManager.lockClosest = false)
                 .withName("fullScore"));
-    driver.leftBumper().whileTrue(drive.partialAutoDriveV2(goalPose(poseManager)));
+    driver.leftBumper().whileTrue(drive.partialAutoDrive(goalPose(poseManager)));
 
     // Operator controls
     operator.y().onTrue(elevator.request(L3));
