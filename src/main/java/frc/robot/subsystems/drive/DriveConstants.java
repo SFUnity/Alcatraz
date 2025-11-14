@@ -159,7 +159,8 @@ public class DriveConstants {
       LoggedTunableNumber slowDriveMultiplier,
       LoggedTunableNumber slowTurnMultiplier) {
 
-    private static final boolean simMode = Constants.currentMode == Constants.Mode.SIM;
+    // private static final boolean simMode = Constants.currentMode == Constants.Mode.SIM;
+    private static final boolean simMode = false;
 
     public double getXInput() {
       return simMode ? -controller.getLeftX() : -controller.getLeftY();

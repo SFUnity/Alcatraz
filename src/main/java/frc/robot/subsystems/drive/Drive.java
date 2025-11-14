@@ -416,14 +416,6 @@ public class Drive extends SubsystemBase {
     }
   }
 
-  // Drive Commands
-  public static enum DriveState {
-    MANUAL,
-    HEADING_CONTROL,
-    AUTO_ALIGN,
-    TRAJECTORY;
-  }
-
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
    */
