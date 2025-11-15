@@ -246,6 +246,7 @@ public class Drive extends SubsystemBase {
     // update the brake mode based on the robot's velocity and state (enabled/disabled)
     updateBrakeMode();
 
+    // Update the tunable numbers
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {
@@ -261,8 +262,7 @@ public class Drive extends SubsystemBase {
         driveKp,
         driveKd);
 
-    // Drive logic
-
+    // Logs
     Logger.recordOutput("Drive/nitro", nitro);
     Util.logSubsystem(this, "Drive");
   }
