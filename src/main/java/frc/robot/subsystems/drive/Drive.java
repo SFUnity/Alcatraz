@@ -72,10 +72,10 @@ public class Drive extends SubsystemBase {
   private final PoseManager poseManager;
   private final DriveCommandsConfig config;
   private static final double DEADBAND = 0.1;
-
   private static final LoggedTunableNumber povMovementSpeed =
       new LoggedTunableNumber("Drive/POV Movement Speed", 0.5);
 
+  // Drive command PID tunables
   private static final LoggedTunableNumber linearkP =
       new LoggedTunableNumber("Drive/Commands/Linear/kP", 3.5);
   private static final LoggedTunableNumber linearkD =
@@ -91,6 +91,7 @@ public class Drive extends SubsystemBase {
   private static final LoggedTunableNumber partialAutoLinearkP =
       new LoggedTunableNumber("Drive/Commands/partialAutoLinearkP", 1.0);
 
+  // Drive command constraints
   private static final LoggedTunableNumber maxLinearVelocity =
       new LoggedTunableNumber("Drive/Commands/Linear - maxVelocity", Units.feetToMeters(7));
   private static final LoggedTunableNumber maxLinearAcceleration =
