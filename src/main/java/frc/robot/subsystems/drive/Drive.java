@@ -366,6 +366,8 @@ public class Drive extends SubsystemBase {
     return output;
   }
 
+  // Brake mode
+
   private boolean brakeHasBeenSet = false;
   private Timer setBrakeTimer = new Timer();
 
@@ -413,6 +415,8 @@ public class Drive extends SubsystemBase {
       module.setBrakeMode(enable);
     }
   }
+
+  // Drive Commands
 
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
@@ -722,6 +726,8 @@ public class Drive extends SubsystemBase {
     return driveVelocity;
   }
 
+  // Methods for the feedback controllers
+
   private void updateTunables() {
     LoggedTunableNumber.ifChanged(
         hashCode(),
@@ -789,6 +795,7 @@ public class Drive extends SubsystemBase {
   }
 
   // Autos
+
   public void followTrajectory(SwerveSample sample) {
     updateAutoTunables();
     Pose2d pose = poseManager.getPose();
@@ -833,6 +840,7 @@ public class Drive extends SubsystemBase {
 
   // Tuning Commands
   // * For tuning drive motor PID values use Phoenix Tuner X (and maybe ff also?)
+
   private static final LoggedTunableNumber tuningTurnDelta =
       new LoggedTunableNumber("Drive/ModuleTunables/turnDeltaForTuning", 90);
   private static final LoggedTunableNumber tuningDriveSpeed =
@@ -864,6 +872,8 @@ public class Drive extends SubsystemBase {
         .withTimeout(2.0)
         .withName("tuneModuleDrive");
   }
+
+  // Characterization commands
 
   private static final double FF_START_DELAY = 2.0; // Secs
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
@@ -1005,6 +1015,7 @@ public class Drive extends SubsystemBase {
   }
 
   // Module Testing
+  
   private int moduleToTest = 0;
   public boolean allModules = false;
 
