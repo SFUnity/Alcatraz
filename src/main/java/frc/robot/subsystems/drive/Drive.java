@@ -107,11 +107,6 @@ public class Drive extends SubsystemBase {
   private static final LoggedTunableNumber ffMaxRadius =
       new LoggedTunableNumber("AutoAlign/ffMaxRadius", 0.8);
 
-  private static final LoggedTunableNumber partialAutoToleranceDeg =
-      new LoggedTunableNumber("Drive/Commands/PartialAuto/toleranceDeg", 7.5);
-  private static final LoggedTunableNumber partialAutoFallOff =
-      new LoggedTunableNumber("Drive/Commands/PartialAuto/fallOff", 2.0);
-
   private final ProfiledPIDController thetaController;
   private final ProfiledPIDController linearController;
   private Translation2d lastSetpointTranslation;
