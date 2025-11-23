@@ -201,8 +201,8 @@ public class VisionIOLimelight implements VisionIO {
     return getCurrentPipelineIndex(name);
   }
 
-  private Translation2d getSpherePosition(double[] detection, double ballRadius) {
-    Translation2d translation = new Translation2d();
+  public Translation2d getFieldRelativeSpherePosition(double[] detection, double ballRadius, PoseManager poseManager) {
+    Translation2d sphereTranslation = new Translation2d();
     double xAngle = detection[RawDetectionRef.txnc];
     double yAngle = detection[RawDetectionRef.tync];
     //undo roll
@@ -211,11 +211,25 @@ public class VisionIOLimelight implements VisionIO {
     Translation2d newRotation = initialTranslation.rotateBy(roll);
     xAngle = newRotation.getX();
     yAngle = newRotation.getY();
-    //find position on ground
+    //find distance on ground
     double height = position.get("height");
     Rotation2d pitch = new Rotation2d(Units.degreesToRadians(position.get("pitch")));
     Rotation2d totalYAngle = new Rotation2d();
-    totalYAngle.plus
-    return translation;
+    totalYAngle = totalYAngle.plus(pitch).plus(new Rotation2d(Units.degreesToRadians(yAngle)));
+    //law of sines
+    double distance = totalYAngle.getCos()*(height/totalYAngle.getSin());
+    //account for ball height
+    double extraDistance = distance*(ballRadius/height);
+    double trueDistance = distance-extraDistance;
+    //get the acc pos
+    sphereTranslation = new Translation2d(trueDistance, 0);
+    //rotate by yaw and xangle
+    sphereTranslation = sphereTranslation.rotateBy(new Rotation2d(Units.degreesToRadians(xAngle))).rotateBy(new Rotation2d(Units.degreesToRadians(position.get("yaw"))));
+    //move by cam position
+    Translation2d camPosition = new Translation2d(position.get("forwardOffset"), position.get("sideOffset"));
+    sphereTranslation = sphereTranslation.plus(camPosition);
+    //move and rotate by robot position
+    sphereTranslation = sphereTranslation.rotateBy(poseManager.getRotation()).plus(poseManager.getTranslation());
+    return sphereTranslation;
   }
 }
