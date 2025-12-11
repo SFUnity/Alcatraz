@@ -44,20 +44,7 @@ public final class RobotCommands {
       PoseManager poseManager,
       Supplier<Pose2d> goalPose,
       BooleanSupplier atPose) {
-    return waitUntil(nearPose(poseManager, goalPose))
-        .andThen(
-            elevator
-                .enableElevator()
-                .alongWith(
-                    either(
-                            waitUntil(elevator::pastL3Height).andThen(carriage.backUpForL3()),
-                            none(),
-                            () ->
-                                elevator.goalHeightInches > ElevatorConstants.pastL3Height.get()
-                                    && !Carriage.coralInDanger)
-                        .andThen(
-                            waitUntil(() -> atPose.getAsBoolean() && elevator.atGoalHeight()),
-                            carriage.placeCoral())));
+    return none();
   }
 
   public static Command dealgify(
