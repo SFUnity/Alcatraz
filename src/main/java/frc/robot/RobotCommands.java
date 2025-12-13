@@ -153,11 +153,7 @@ public final class RobotCommands {
   }
 
   public static Command lowLevelCoralIntake(Carriage carriage, Funnel funnel) {
-    return carriage
-        .intakeCoral()
-        .until(carriage::coralHeld)
-        .alongWith(funnel.runRollers().until(() -> carriage.coralHeld()))
-        .withName("lowLevelCoralIntake");
+    return none();
   }
 
   public static enum IntakeState {
