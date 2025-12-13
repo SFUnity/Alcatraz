@@ -17,7 +17,6 @@ import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveConstants.DriveCommandsConfig;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorConstants;
 import frc.robot.subsystems.funnel.Funnel;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.leds.Leds;
@@ -25,7 +24,6 @@ import frc.robot.util.PoseManager;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import org.littletonrobotics.junction.Logger;
 
 /** Put high level commands here */
 public final class RobotCommands {
@@ -72,15 +70,11 @@ public final class RobotCommands {
   }
 
   public static Command scoreProcessor(
-      Carriage carriage,
-      Elevator elevator,
-      BooleanSupplier atPose) {
+      Carriage carriage, Elevator elevator, BooleanSupplier atPose) {
     return none();
   }
 
-  public static Command scoreL1(
-      Intake intake,
-      BooleanSupplier atPose) {
+  public static Command scoreL1(Intake intake, BooleanSupplier atPose) {
     return none();
   }
 
