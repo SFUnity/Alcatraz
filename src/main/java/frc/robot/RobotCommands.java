@@ -52,13 +52,17 @@ public final class RobotCommands {
     return dealgify(elevator, carriage, poseManager, goalPose(poseManager), atPose);
   }
 
-  public static Command dealgify(
-      Elevator elevator,
-      Carriage carriage,
-      PoseManager poseManager,
-      Supplier<Pose2d> goalPose,
-      BooleanSupplier atPose) {
-    return none();
+  public static Command dealgify(Elevator elevator, Carriage carriage, PoseManager poseManager, Supplier<Pose2d> goalPose, BooleanSupplier atPose) {
+    return waitUntil(
+      nearPose(poseManager, goalPose))
+      .andThen( () -> {
+          if(poseManager.closestFaceHighAlgae()) {
+            elevator.request(AlgaeHigh);
+          } else {
+            elevator.request(AlgaeLow);
+          }})
+          .alongWith(
+            either(carriage.highDealgify(), carriage.lowDealgify(), poseManager::closestFaceHighAlgae));
   }
 
   public static Command scoreProcessorOrL1(
