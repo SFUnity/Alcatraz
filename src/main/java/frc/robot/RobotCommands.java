@@ -66,13 +66,7 @@ public final class RobotCommands {
       BooleanSupplier atPose) {
     return waitUntil(nearPose(poseManager, goalPose))
         .andThen(
-            () -> {
-              if (poseManager.closestFaceHighAlgae()) {
-                elevator.request(AlgaeHigh);
-              } else {
-                elevator.request(AlgaeLow);
-              }
-            })
+            either(elevator.request(AlgaeHigh), elevator.request(AlgaeLow), poseManager::closestFaceHighAlgae))
         .alongWith(
             either(
                 carriage.highDealgify(),
