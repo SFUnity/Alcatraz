@@ -69,8 +69,9 @@ public final class RobotCommands {
     return either(scoreProcessor(carriage, elevator, atPose), scoreL1(intake, atPose), () -> front);
   }
 
-  public static Command scoreProcessor(
-      Carriage carriage, Elevator elevator, BooleanSupplier atPose) {
+  public static Command scoreProcessor(Carriage carriage, Elevator elevator, BooleanSupplier atPose) {
+
+    
     return none();
   }
 
@@ -120,7 +121,8 @@ public final class RobotCommands {
   }
 
   public static Command lowLevelCoralIntake(Carriage carriage, Funnel funnel) {
-    return none();
+    return carriage.intakeCoral().alongWith(funnel.runRollers()).until(carriage::coralHeld);
+    
   }
 
   public static IntakeState intakeState = Source;
@@ -161,4 +163,5 @@ public final class RobotCommands {
     Ice_Cream,
     Ground
   }
+
 }
