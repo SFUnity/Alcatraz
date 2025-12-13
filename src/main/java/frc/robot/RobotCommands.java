@@ -4,6 +4,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static frc.robot.RobotCommands.IntakeState.*;
 import static frc.robot.RobotCommands.ScoreState.*;
 import static frc.robot.constantsGlobal.FieldConstants.*;
+import static frc.robot.subsystems.elevator.ElevatorConstants.pastL3Height;
 import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.*;
 import static frc.robot.subsystems.intake.IntakeConstants.groundAlgae;
 import static frc.robot.util.AllianceFlipUtil.apply;
@@ -33,9 +34,9 @@ public final class RobotCommands {
 
   public static Command scoreCoral(
       Elevator elevator, Carriage carriage, PoseManager poseManager, BooleanSupplier atPose) {
-    return scoreCoral(elevator, carriage, poseManager, goalPose(poseManager), atPose);
+    return waitUntil(atPose).andThen(elevator.enableElevator()).andThen(either(waitUntil(elevator::pastL3Height).andThen(carriage.backUpForL3()), none(), atPose).andThen(waitUntil(() -> atPose.getAsBoolean() && elevator.atGoalHeight()).andThen(carriage.placeCoral())));
   }
-
+  
   public static Command scoreCoral(
       Elevator elevator,
       Carriage carriage,
