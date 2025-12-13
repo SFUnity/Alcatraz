@@ -36,13 +36,15 @@ public final class RobotCommands {
     return scoreCoral(elevator, carriage, poseManager, goalPose(poseManager), atPose);
   }
 
-  public static Command scoreCoral(
-      Elevator elevator,
-      Carriage carriage,
-      PoseManager poseManager,
-      Supplier<Pose2d> goalPose,
-      BooleanSupplier atPose) {
-    return none();
+  public static Command scoreCoral(Elevator elevator, Carriage carriage, PoseManager poseManager, Supplier<Pose2d> goalPose, BooleanSupplier atPose) {
+    return waitUntil(
+      nearPose(poseManager, goalPose))
+      .andThen(elevator.enableElevator(), 
+      either(
+        waitUntil(elevator::pastL3Height).andThen(carriage.backUpForL3()), 
+        null, elevator::pastL3Height), 
+        waitUntil(atPose), 
+        carriage.placeCoral());
   }
 
   public static Command dealgify(
