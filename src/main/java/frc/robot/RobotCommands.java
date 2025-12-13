@@ -75,7 +75,7 @@ public final class RobotCommands {
   }
 
   public static Command scoreL1(Intake intake, BooleanSupplier atPose) {
-    return none();
+    return waitUntil(atPose).andThen(intake.poopCmd()) ;
   }
 
   private static BooleanSupplier nearPose(PoseManager poseManager, Supplier<Pose2d> goalPose) {
