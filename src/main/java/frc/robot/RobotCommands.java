@@ -71,7 +71,7 @@ public final class RobotCommands {
 
   public static Command scoreProcessor(
       Carriage carriage, Elevator elevator, BooleanSupplier atPose) {
-    return none();
+    return waitUntil(atPose).andThen(elevator.request(Processor), elevator.enableElevator(), carriage.scoreProcessor());
   }
 
   public static Command scoreL1(Intake intake, BooleanSupplier atPose) {
