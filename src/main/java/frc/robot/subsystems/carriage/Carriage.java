@@ -17,7 +17,7 @@ import frc.robot.util.Util;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class  Carriage extends SubsystemBase {
+public class Carriage extends SubsystemBase {
   private final CarriageIO io;
   private final CarrageIOInputsAutoLogged inputs = new CarrageIOInputsAutoLogged();
   private final PoseManager poseManager;

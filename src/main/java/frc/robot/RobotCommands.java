@@ -36,15 +36,21 @@ public final class RobotCommands {
     return scoreCoral(elevator, carriage, poseManager, goalPose(poseManager), atPose);
   }
 
-  public static Command scoreCoral(Elevator elevator, Carriage carriage, PoseManager poseManager, Supplier<Pose2d> goalPose, BooleanSupplier atPose) {
-    return waitUntil(
-      nearPose(poseManager, goalPose))
-      .andThen(elevator.enableElevator(), 
-      either(
-        waitUntil(elevator::pastL3Height).andThen(carriage.backUpForL3()), 
-        null, elevator::pastL3Height), 
-        waitUntil(atPose), 
-        carriage.placeCoral());
+  public static Command scoreCoral(
+      Elevator elevator,
+      Carriage carriage,
+      PoseManager poseManager,
+      Supplier<Pose2d> goalPose,
+      BooleanSupplier atPose) {
+    return waitUntil(nearPose(poseManager, goalPose))
+        .andThen(
+            elevator.enableElevator(),
+            either(
+                waitUntil(elevator::pastL3Height).andThen(carriage.backUpForL3()),
+                null,
+                elevator::pastL3Height),
+            waitUntil(atPose),
+            carriage.placeCoral());
   }
 
   public static Command dealgify(
@@ -52,17 +58,26 @@ public final class RobotCommands {
     return dealgify(elevator, carriage, poseManager, goalPose(poseManager), atPose);
   }
 
-  public static Command dealgify(Elevator elevator, Carriage carriage, PoseManager poseManager, Supplier<Pose2d> goalPose, BooleanSupplier atPose) {
-    return waitUntil(
-      nearPose(poseManager, goalPose))
-      .andThen( () -> {
-          if(poseManager.closestFaceHighAlgae()) {
-            elevator.request(AlgaeHigh);
-          } else {
-            elevator.request(AlgaeLow);
-          }})
-          .alongWith(
-            either(carriage.highDealgify(), carriage.lowDealgify(), poseManager::closestFaceHighAlgae));
+  public static Command dealgify(
+      Elevator elevator,
+      Carriage carriage,
+      PoseManager poseManager,
+      Supplier<Pose2d> goalPose,
+      BooleanSupplier atPose) {
+    return waitUntil(nearPose(poseManager, goalPose))
+        .andThen(
+            () -> {
+              if (poseManager.closestFaceHighAlgae()) {
+                elevator.request(AlgaeHigh);
+              } else {
+                elevator.request(AlgaeLow);
+              }
+            })
+        .alongWith(
+            either(
+                carriage.highDealgify(),
+                carriage.lowDealgify(),
+                poseManager::closestFaceHighAlgae));
   }
 
   public static Command scoreProcessorOrL1(
@@ -75,8 +90,11 @@ public final class RobotCommands {
     return either(scoreProcessor(carriage, elevator, atPose), scoreL1(intake, atPose), () -> front);
   }
 
-  public static Command scoreProcessor(Carriage carriage, Elevator elevator, BooleanSupplier atPose) {
-    return waitUntil(atPose).andThen(elevator.request(Processor), elevator.enableElevator(), (carriage.scoreProcessor()));
+  public static Command scoreProcessor(
+      Carriage carriage, Elevator elevator, BooleanSupplier atPose) {
+    return waitUntil(atPose)
+        .andThen(
+            elevator.request(Processor), elevator.enableElevator(), (carriage.scoreProcessor()));
   }
 
   public static Command scoreL1(Intake intake, BooleanSupplier atPose) {
@@ -126,7 +144,6 @@ public final class RobotCommands {
 
   public static Command lowLevelCoralIntake(Carriage carriage, Funnel funnel) {
     return carriage.intakeCoral().alongWith(funnel.runRollers()).until(carriage::coralHeld);
-    
   }
 
   public static IntakeState intakeState = Source;
@@ -167,5 +184,4 @@ public final class RobotCommands {
     Ice_Cream,
     Ground
   }
-
 }
