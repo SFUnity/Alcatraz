@@ -120,7 +120,7 @@ public final class RobotCommands {
   }
 
   public static Command lowLevelCoralIntake(Carriage carriage, Funnel funnel) {
-    return none();
+    return carriage.intakeCoral().until(carriage.coralHeld());
   }
 
   public static IntakeState intakeState = Source;
