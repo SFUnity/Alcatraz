@@ -68,15 +68,20 @@ public final class RobotCommands {
       PoseManager poseManager,
       boolean front,
       BooleanSupplier atPose) {
-    return waitUntil(atPose)
-        .andThen(
-            either(
-                elevator
-                    .request(Processor)
-                    .andThen(elevator.enableElevator(), carriage.scoreProcessor()),
-                intake.poopCmd(),
-                () -> front))
-        .withName("scoreProcessor");
+    return either(scoreProcessor(carriage, elevator, atPose), scoreL1(intake, atPose), () -> front);
+  }
+
+  public static Command scoreProcessor(
+      Carriage carriage,
+      Elevator elevator,
+      BooleanSupplier atPose) {
+    return none();
+  }
+
+  public static Command scoreL1(
+      Intake intake,
+      BooleanSupplier atPose) {
+    return none();
   }
 
   private static BooleanSupplier nearPose(PoseManager poseManager, Supplier<Pose2d> goalPose) {
