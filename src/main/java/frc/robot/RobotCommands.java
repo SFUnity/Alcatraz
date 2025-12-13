@@ -119,6 +119,10 @@ public final class RobotCommands {
     ScoreL1
   }
 
+  public static Command lowLevelCoralIntake(Carriage carriage, Funnel funnel) {
+    return none();
+  }
+
   public static IntakeState intakeState = Source;
 
   public static Command fullIntake(
@@ -150,10 +154,6 @@ public final class RobotCommands {
         .beforeStarting(() -> Leds.getInstance().intakingActivated = true)
         .finallyDo(() -> Leds.getInstance().intakingActivated = false)
         .withName("fullIntake");
-  }
-
-  public static Command lowLevelCoralIntake(Carriage carriage, Funnel funnel) {
-    return none();
   }
 
   public static enum IntakeState {
