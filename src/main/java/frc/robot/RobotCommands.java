@@ -58,19 +58,7 @@ public final class RobotCommands {
       PoseManager poseManager,
       Supplier<Pose2d> goalPose,
       BooleanSupplier atPose) {
-    BooleanSupplier highAlgae =
-        () -> {
-          if (DriverStation.isTest()) return false;
-          return poseManager.closestFaceHighAlgae();
-        };
-    return waitUntil(nearPose(poseManager, goalPose))
-        .andThen(
-            parallel(
-                either(elevator.request(AlgaeHigh), elevator.request(AlgaeLow), highAlgae)
-                    .andThen(elevator.enableElevator()),
-                either(carriage.highDealgify(), carriage.lowDealgify(), highAlgae)))
-        .alongWith(
-            runOnce(() -> Logger.recordOutput("Controls/HighAlgae", highAlgae.getAsBoolean())));
+    return none();
   }
 
   public static Command scoreProcessorOrL1(
