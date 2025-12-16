@@ -71,11 +71,12 @@ public final class RobotCommands {
 
   public static Command scoreProcessor(
       Carriage carriage, Elevator elevator, BooleanSupplier atPose) {
-    return waitUntil(atPose).andThen(elevator.request(Processor), elevator.enableElevator(), carriage.scoreProcessor());
+    return waitUntil(atPose)
+        .andThen(elevator.request(Processor), elevator.enableElevator(), carriage.scoreProcessor());
   }
 
   public static Command scoreL1(Intake intake, BooleanSupplier atPose) {
-    return none();
+    return waitUntil(atPose).andThen(intake.poopCmd());
   }
 
   private static BooleanSupplier nearPose(PoseManager poseManager, Supplier<Pose2d> goalPose) {
