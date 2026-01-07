@@ -412,9 +412,11 @@ public class Robot extends LoggedRobot {
       drive.setDefaultCommand(drive.joystickDrive());
     }
     elevator.setDefaultCommand(elevator.disableElevator(carriage::algaeHeld));
-    carriage.setDefaultCommand(carriage.stopOrHold());
+    carriage.setDefaultCommand(carriage.stopHoldOrIntake());
     intake.setDefaultCommand(intake.raiseAndStopOrHoldCmd());
     funnel.setDefaultCommand(funnel.stop());
+
+    new Trigger(() -> carriage.coralPassed).onTrue(carriage.intakeCoralV2());
 
     // Driver controls
     driver.rightTrigger().onTrue(runOnce(() -> Drive.nitro = !Drive.nitro));
