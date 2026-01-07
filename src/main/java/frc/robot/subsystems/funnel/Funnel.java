@@ -6,7 +6,6 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.carriage.CarriageConstants;
 import org.littletonrobotics.junction.Logger;
 
