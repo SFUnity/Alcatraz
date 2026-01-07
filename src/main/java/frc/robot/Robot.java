@@ -569,7 +569,7 @@ public class Robot extends LoggedRobot {
                 carriage.ejectCoral(),
                 funnel.eject(),
                 waitSeconds(0.2).andThen(carriage.resetHeld())));
-    operator.leftTrigger().onFalse(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+    // operator.leftTrigger().onFalse(RobotCommands.lowLevelCoralIntake(carriage, funnel));
     operator.povUp().onTrue(runOnce(() -> intakeState = Source));
     operator.povRight().onTrue(runOnce(() -> intakeState = Ice_Cream));
     operator.povDown().onTrue(runOnce(() -> intakeState = Ground));
@@ -603,13 +603,13 @@ public class Robot extends LoggedRobot {
         .and(DriverStation::isTeleop)
         .onTrue(runOnce(() -> scoreState = groundAlgae.get() ? ProcessorBack : ScoreL1));
 
-    intakeTrigger
-        .or(() -> poseManager.nearStation() && allowAutoDrive)
-        .and(() -> intakeState == Source && DriverStation.isTeleop() && !carriage.algaeHeld())
-        .onTrue(
-            RobotCommands.lowLevelCoralIntake(carriage, funnel)
-                .onlyWhile(() -> intakeOK)
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // intakeTrigger
+    //     .or(() -> poseManager.nearStation() && allowAutoDrive)
+    //     .and(() -> intakeState == Source && DriverStation.isTeleop() && !carriage.algaeHeld())
+    //     .onTrue(
+    //         RobotCommands.lowLevelCoralIntake(carriage, funnel)
+    //             .onlyWhile(() -> intakeOK)
+    //             .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     intakeTrigger.onFalse(
         runOnce(() -> intakeOK = false).andThen(waitSeconds(0.1), runOnce(() -> intakeOK = true)));
@@ -710,9 +710,7 @@ public class Robot extends LoggedRobot {
 
   private Command elevatorAndCarriageTest() {
     Timer timer = new Timer();
-    return carriage
-        .intakeCoral()
-        .asProxy()
+    return waitUntil(carriage::coralHeld)
         .andThen(
             elevator.request(L2),
             elevator.enableElevator(),

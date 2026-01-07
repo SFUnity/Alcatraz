@@ -214,22 +214,22 @@ public class Carriage extends SubsystemBase {
         .withName("lowDealgify");
   }
 
-  public Command intakeCoral() {
-    return Commands.either(
-            run(() -> io.runVolts(placeSpeedVolts.get())),
-            run(() -> io.runVolts(intakingSpeedVolts.get()))
-                .until(() -> coralPassed)
-                .andThen(
-                    run(() -> io.runVolts(slowIntakeSpeedVolts.get())).until(() -> !beamBreak()),
-                    run(() -> io.runVolts(-intakingSpeedVolts.get())).until(() -> beamBreak()))
-                .onlyIf(() -> !coralHeld()),
-            () -> coralInDanger)
-        .deadlineFor(
-            Commands.runEnd(
-                () -> Leds.getInstance().intakingActivated = true,
-                () -> Leds.getInstance().intakingActivated = false))
-        .withName("intake coral");
-  }
+  // public Command intakeCoral() {
+  //   return Commands.either(
+  //           run(() -> io.runVolts(placeSpeedVolts.get())),
+  //           run(() -> io.runVolts(intakingSpeedVolts.get()))
+  //               .until(() -> coralPassed)
+  //               .andThen(
+  //                   run(() -> io.runVolts(slowIntakeSpeedVolts.get())).until(() -> !beamBreak()),
+  //                   run(() -> io.runVolts(-intakingSpeedVolts.get())).until(() -> beamBreak()))
+  //               .onlyIf(() -> !coralHeld()),
+  //           () -> coralInDanger)
+  //       .deadlineFor(
+  //           Commands.runEnd(
+  //               () -> Leds.getInstance().intakingActivated = true,
+  //               () -> Leds.getInstance().intakingActivated = false))
+  //       .withName("intake coral");
+  // }
 
   public Command intakeCoralV2() {
     return sequence(run(() -> io.runVolts(slowIntakeSpeedVolts.get())).until(() -> !beamBreak()),

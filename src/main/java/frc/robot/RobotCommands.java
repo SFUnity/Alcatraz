@@ -178,13 +178,13 @@ public final class RobotCommands {
         .withName("fullIntake");
   }
 
-  public static Command lowLevelCoralIntake(Carriage carriage, Funnel funnel) {
-    return carriage
-        .intakeCoral()
-        .until(carriage::coralHeld)
-        .alongWith(funnel.runRollers().until(() -> carriage.coralHeld()))
-        .withName("lowLevelCoralIntake");
-  }
+  // public static Command lowLevelCoralIntake(Carriage carriage, Funnel funnel) {
+  //   return carriage
+  //       .intakeCoral()
+  //       .until(carriage::coralHeld)
+  //       .alongWith(funnel.runRollers().until(() -> carriage.coralHeld()))
+  //       .withName("lowLevelCoralIntake");
+  // }
 
   public static enum IntakeState {
     Source,
