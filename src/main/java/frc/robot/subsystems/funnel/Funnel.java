@@ -2,8 +2,11 @@ package frc.robot.subsystems.funnel;
 
 import static frc.robot.subsystems.funnel.FunnelConstants.*;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.carriage.CarriageConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -32,5 +35,15 @@ public class Funnel extends SubsystemBase {
 
   public Command stop() {
     return run(() -> io.runVolts(0));
+  }
+
+  public Command defaultCmd(BooleanSupplier coralHeld, BooleanSupplier intakingAlgae) {
+    return run(() -> {
+      if (coralHeld.getAsBoolean() || intakingAlgae.getAsBoolean()) {
+        io.runVolts(0);
+      } else {
+        io.runVolts(rollerSpeedVolts.get());
+      }
+    });
   }
 }
