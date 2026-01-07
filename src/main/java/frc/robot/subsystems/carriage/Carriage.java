@@ -232,9 +232,10 @@ public class Carriage extends SubsystemBase {
   // }
 
   public Command intakeCoralV2() {
-    return sequence(run(() -> io.runVolts(slowIntakeSpeedVolts.get())).until(() -> !beamBreak()),
-                    run(() -> io.runVolts(-intakingSpeedVolts.get())).until(() -> beamBreak()))
-                .onlyIf(() -> !coralHeld());
+    return sequence(
+            run(() -> io.runVolts(slowIntakeSpeedVolts.get())).until(() -> !beamBreak()),
+            run(() -> io.runVolts(-intakingSpeedVolts.get())).until(() -> beamBreak()))
+        .onlyIf(() -> !coralHeld());
   }
 
   public Command scoreProcessor() {
