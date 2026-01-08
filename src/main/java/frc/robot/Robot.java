@@ -538,6 +538,10 @@ public class Robot extends LoggedRobot {
         .and(new Trigger(() -> scoreState == LeftBranch || scoreState == RightBranch))
         .and(new Trigger(carriage::coralHeld))
         .whileTrue(scoreCoral(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
+    driver
+        .leftBumper()
+        .and(new Trigger(carriage::coralHeld).and(new Trigger(carriage::algaeHeld)).negate())
+        .whileTrue(dealgify(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
 
     // Operator controls
     operator.y().onTrue(elevator.request(L3));
