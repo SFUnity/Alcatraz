@@ -536,6 +536,7 @@ public class Robot extends LoggedRobot {
     driver
         .leftBumper()
         .and(new Trigger(() -> scoreState == LeftBranch || scoreState == RightBranch))
+        .and(new Trigger(carriage::coralHeld))
         .whileTrue(scoreCoral(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
 
     // Operator controls
