@@ -533,7 +533,10 @@ public class Robot extends LoggedRobot {
                 .finallyDo(() -> poseManager.lockClosest = false)
                 .withName("fullScore"));
     driver.leftBumper().whileTrue(drive.partialAutoDrive(goalPose(poseManager)));
-    driver.leftBumper().and(new Trigger(() -> scoreState == LeftBranch || scoreState == RightBranch)).whileTrue(scoreCoral(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
+    driver
+        .leftBumper()
+        .and(new Trigger(() -> scoreState == LeftBranch || scoreState == RightBranch))
+        .whileTrue(scoreCoral(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
 
     // Operator controls
     operator.y().onTrue(elevator.request(L3));
