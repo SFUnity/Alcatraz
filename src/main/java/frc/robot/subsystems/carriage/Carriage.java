@@ -171,6 +171,8 @@ public class Carriage extends SubsystemBase {
             io.runVolts(-intakingSpeedVolts.get());
           } else if (algaeHeld()) {
             io.runVolts(holdSpeedVolts.get());
+          } else if (coralHeld()) {
+            io.runVolts(0);
           } else {
             io.runVolts(intakingSpeedVolts.get());
           }
