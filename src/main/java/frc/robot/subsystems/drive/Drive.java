@@ -72,10 +72,10 @@ public class Drive extends SubsystemBase {
   private final PoseManager poseManager;
   private final DriveCommandsConfig config;
   private static final double DEADBAND = 0.1;
-
   private static final LoggedTunableNumber povMovementSpeed =
       new LoggedTunableNumber("Drive/POV Movement Speed", 0.5);
 
+  // Drive command PID tunables
   private static final LoggedTunableNumber linearkP =
       new LoggedTunableNumber("Drive/Commands/Linear/kP", 3.5);
   private static final LoggedTunableNumber linearkD =
@@ -88,7 +88,10 @@ public class Drive extends SubsystemBase {
       new LoggedTunableNumber("Drive/Commands/Linear/tolerance", 0.05);
   private static final LoggedTunableNumber thetaToleranceDeg =
       new LoggedTunableNumber("Drive/Commands/Theta/toleranceDeg", 2.0);
+  private static final LoggedTunableNumber partialAutoLinearkP =
+      new LoggedTunableNumber("Drive/Commands/partialAutoLinearkP", 1.0);
 
+  // Drive command constraints
   private static final LoggedTunableNumber maxLinearVelocity =
       new LoggedTunableNumber("Drive/Commands/Linear - maxVelocity", Units.feetToMeters(7));
   private static final LoggedTunableNumber maxLinearAcceleration =
@@ -104,11 +107,6 @@ public class Drive extends SubsystemBase {
       new LoggedTunableNumber("AutoAlign/ffMinRadius", 0.2);
   private static final LoggedTunableNumber ffMaxRadius =
       new LoggedTunableNumber("AutoAlign/ffMaxRadius", 0.8);
-
-  private static final LoggedTunableNumber partialAutoToleranceDeg =
-      new LoggedTunableNumber("Drive/Commands/PartialAuto/toleranceDeg", 7.5);
-  private static final LoggedTunableNumber partialAutoFallOff =
-      new LoggedTunableNumber("Drive/Commands/PartialAuto/fallOff", 2.0);
 
   private final ProfiledPIDController thetaController;
   private final ProfiledPIDController linearController;
@@ -248,6 +246,7 @@ public class Drive extends SubsystemBase {
     // update the brake mode based on the robot's velocity and state (enabled/disabled)
     updateBrakeMode();
 
+    // Update the tunable numbers
     LoggedTunableNumber.ifChanged(
         hashCode(),
         () -> {
@@ -263,6 +262,7 @@ public class Drive extends SubsystemBase {
         driveKp,
         driveKd);
 
+    // Logs
     Logger.recordOutput("Drive/nitro", nitro);
     Util.logSubsystem(this, "Drive");
   }
@@ -305,13 +305,6 @@ public class Drive extends SubsystemBase {
     Logger.recordOutput("Drive/SwerveStates/SetpointsOptimized", setpointStates);
   }
 
-  /** Runs the drive in a straight line with the specified drive output. */
-  public void runCharacterization(double output) {
-    for (int i = 0; i < 4; i++) {
-      modules[i].runCharacterization(output);
-    }
-  }
-
   /** Stops the drive. */
   public void stop() {
     runVelocity(new ChassisSpeeds());
@@ -346,23 +339,7 @@ public class Drive extends SubsystemBase {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
-  /** Returns the position of each module in radians. */
-  public double[] getWheelRadiusCharacterizationPositions() {
-    double[] values = new double[4];
-    for (int i = 0; i < 4; i++) {
-      values[i] = modules[i].getWheelRadiusCharacterizationPosition();
-    }
-    return values;
-  }
-
-  /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
-  public double getFFCharacterizationVelocity() {
-    double output = 0.0;
-    for (int i = 0; i < 4; i++) {
-      output += modules[i].getFFCharacterizationVelocity() / 4.0;
-    }
-    return output;
-  }
+  // Brake mode
 
   private boolean brakeHasBeenSet = false;
   private Timer setBrakeTimer = new Timer();
@@ -419,40 +396,26 @@ public class Drive extends SubsystemBase {
    */
   public Command joystickDrive() {
     return run(() -> {
-          // Convert to doubles
-          double o = config.getOmegaInput();
-
-          // Apply deadband
-          double omega = MathUtil.applyDeadband(o, DEADBAND);
-
-          // Check for slow mode
-          if (config.slowMode().getAsBoolean()) {
-            omega *= config.slowTurnMultiplier().get();
-          }
-
-          // Square values and scale to max velocity
-          omega = Math.copySign(omega * omega, omega);
-          omega *= maxAngularSpeedRadiansPerSec;
-
-          // Get linear velocity
+          // Get velocities from joysticks
+          double omega = getAngularVelocityFromJoysticks();
           Translation2d linearVelocity = getLinearVelocityFromJoysticks();
 
           // Get pov movement
-          double x = 0;
-          double y = 0;
+          double povX = 0;
+          double povY = 0;
           if (config.povDownPressed()) {
-            x = -povMovementSpeed.get();
+            povX = -povMovementSpeed.get();
           } else if (config.povUpPressed()) {
-            x = povMovementSpeed.get();
+            povX = povMovementSpeed.get();
           } else if (config.povLeftPressed()) {
-            y = povMovementSpeed.get();
+            povY = povMovementSpeed.get();
           } else if (config.povRightPressed()) {
-            y = -povMovementSpeed.get();
+            povY = -povMovementSpeed.get();
           }
 
           // Convert to field relative speeds & send command
-          if (Math.abs(x) > 0 || Math.abs(y) > 0) {
-            runVelocity(new ChassisSpeeds(x, y, omega));
+          if (Math.abs(povX) > 0 || Math.abs(povY) > 0) {
+            runVelocity(new ChassisSpeeds(povX, povY, omega));
           } else {
             runVelocity(
                 ChassisSpeeds.fromFieldRelativeSpeeds(
@@ -477,34 +440,15 @@ public class Drive extends SubsystemBase {
           updateThetaTunables();
           updateThetaConstraints();
 
-          // Get pov movement
-          double x = 0;
-          double y = 0;
-          if (config.povDownPressed()) {
-            x = povMovementSpeed.get();
-          } else if (config.povUpPressed()) {
-            x = -povMovementSpeed.get();
-          } else if (config.povLeftPressed()) {
-            y = povMovementSpeed.get();
-          } else if (config.povRightPressed()) {
-            y = -povMovementSpeed.get();
-          }
-
-          Translation2d linearVelocity;
-          if (Math.abs(x) > 0 || Math.abs(y) > 0) {
-            ChassisSpeeds speeds =
-                ChassisSpeeds.fromRobotRelativeSpeeds(x, y, 0, poseManager.rawGyroRotation);
-            linearVelocity = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-          } else {
-            linearVelocity = getLinearVelocityFromJoysticks();
-          }
+          Translation2d linearVelocity = getLinearVelocityFromJoysticks();
+          double angularVelocity = getAngularVelocityFromProfiledPID(goalHeading.get());
 
           // Convert to field relative speeds & send command
           runVelocity(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX(),
                   linearVelocity.getY(),
-                  getAngularVelocityFromProfiledPID(goalHeading.get().getRadians()),
+                  angularVelocity,
                   AllianceFlipUtil.shouldFlip()
                       ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
                       : poseManager.getRotation()));
@@ -525,98 +469,6 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Prototype of drive that allows driver to maintain control of the robot but subtly inputs minor
-   * shifts towards goal pose
-   *
-   * @param goalPose
-   * @return
-   */
-  public Command partialAutoDrice(Supplier<Pose2d> goalPose) {
-    return run(
-        () -> {
-          updateTunables();
-          updateConstraints();
-
-          Pose2d targetPose = goalPose.get();
-
-          Rotation2d targetPoseAngle = poseManager.getHorizontalAngleTo(targetPose);
-
-          // Get pov movement
-          double x = 0;
-          double y = 0;
-          if (config.povDownPressed()) {
-            x = povMovementSpeed.get();
-          } else if (config.povUpPressed()) {
-            x = -povMovementSpeed.get();
-          } else if (config.povLeftPressed()) {
-            y = povMovementSpeed.get();
-          } else if (config.povRightPressed()) {
-            y = -povMovementSpeed.get();
-          }
-
-          Translation2d linearVelocity;
-          if (Math.abs(x) > 0 || Math.abs(y) > 0) {
-            ChassisSpeeds speeds =
-                ChassisSpeeds.fromRobotRelativeSpeeds(x, y, 0, poseManager.rawGyroRotation);
-            linearVelocity = new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-          } else {
-            linearVelocity = getLinearVelocityFromJoysticks();
-          }
-
-          Rotation2d inputAngle =
-              poseManager.getHorizontalAngleTo(poseManager.getTranslation().plus(linearVelocity));
-
-          double angleError = inputAngle.getDegrees() - targetPoseAngle.getDegrees();
-
-          if (Math.abs(angleError) < partialAutoToleranceDeg.get()) {
-            double distToTarget = poseManager.getDistanceTo(targetPose);
-            double distFallOff = Math.pow(Math.E, distToTarget / partialAutoFallOff.get());
-
-            Rotation2d adjustedAngleError =
-                new Rotation2d((angleError * distFallOff) / 180.0 * Math.PI);
-            Rotation2d adjustedAngle = inputAngle.plus(adjustedAngleError);
-
-            linearVelocity.rotateBy(adjustedAngleError);
-
-            double thetaVelocity = getAngularVelocityFromProfiledPID(adjustedAngle.getRadians());
-            if (thetaController.atGoal()) thetaVelocity = 0.0;
-
-            runVelocity(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                    linearVelocity.getX(),
-                    linearVelocity.getY(),
-                    thetaVelocity,
-                    AllianceFlipUtil.shouldFlip()
-                        ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
-                        : poseManager.getRotation()));
-          } else {
-            double o = config.getOmegaInput();
-
-            // Apply deadband
-            double omega = MathUtil.applyDeadband(o, DEADBAND);
-
-            // Check for slow mode
-            if (config.slowMode().getAsBoolean()) {
-              omega *= config.slowTurnMultiplier().get();
-            }
-
-            // Square values and scale to max velocity
-            omega = Math.copySign(omega * omega, omega);
-            omega *= maxAngularSpeedRadiansPerSec;
-
-            runVelocity(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                    linearVelocity.getX(),
-                    linearVelocity.getY(),
-                    omega,
-                    AllianceFlipUtil.shouldFlip()
-                        ? poseManager.getRotation().plus(new Rotation2d(Math.PI))
-                        : poseManager.getRotation()));
-          }
-        });
-  }
-
-  /**
    * Field relative drive command using a ProfiledPID for linear velocity and a ProfiledPID for
    * angular velocity.
    */
@@ -627,46 +479,11 @@ public class Drive extends SubsystemBase {
 
           Pose2d targetPose = goalPose.get();
 
-          // Reset the linear controller
-          linearController.reset(
-              lastSetpointTranslation.getDistance(targetPose.getTranslation()),
-              linearController.getSetpoint().velocity);
-
           // Calculate linear speed
-          double currentDistance = poseManager.getDistanceTo(targetPose);
-          double ffScaler =
-              MathUtil.clamp(
-                  (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
-                  0.0,
-                  0.5);
-          Logger.recordOutput(
-              "Drive/Commands/ffOut", linearController.getSetpoint().velocity * ffScaler);
-          Logger.recordOutput(
-              "Drive/Commands/pidOut", linearController.calculate(currentDistance, 0.0));
-          double driveVelocityScalar =
-              linearController.getSetpoint().velocity * ffScaler
-                  + linearController.calculate(currentDistance, 0.0);
-
-          if (linearAtGoal()) driveVelocityScalar = 0.0;
-
-          lastSetpointTranslation =
-              new Pose2d(targetPose.getTranslation(), poseManager.getHorizontalAngleTo(targetPose))
-                  .transformBy(GeomUtil.toTransform2d(linearController.getSetpoint().position, 0.0))
-                  .getTranslation();
-
-          // Calculate angle to target then transform by velocity scalar
-          Translation2d driveVelocity =
-              new Pose2d(
-                      new Translation2d(),
-                      poseManager.getTranslation().minus(targetPose.getTranslation()).getAngle())
-                  .transformBy(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
-                  .getTranslation();
+          Translation2d driveVelocity = getLinearVelocityFromProfiledPID(targetPose);
 
           // Calculate theta speed
-          double thetaVelocity =
-              thetaController.getSetpoint().velocity * ffScaler
-                  + getAngularVelocityFromProfiledPID(targetPose.getRotation().getRadians());
-          if (thetaController.atGoal()) thetaVelocity = 0.0;
+          double thetaVelocity = getAngularVelocityFromProfiledPID(targetPose);
 
           // Send command
           runVelocity(
@@ -677,8 +494,6 @@ public class Drive extends SubsystemBase {
                   poseManager.getRotation()));
 
           Leds.getInstance().alignedWithTarget = linearAtGoal() && thetaAtGoal();
-
-          Logger.recordOutput("Drive/Commands/Linear/currentDistance", currentDistance);
         })
         .beforeStarting(
             () -> {
@@ -694,6 +509,74 @@ public class Drive extends SubsystemBase {
             })
         .onlyWhile(this::noJoystickInput)
         .withName("Full Auto Drive");
+  }
+
+  public Command partialAutoDrive(Supplier<Pose2d> goalPose) {
+    return run(() -> {
+          // Get manual linear velocity
+          Translation2d manualLinearVelocity = getLinearVelocityFromJoysticks();
+          Translation2d flippedManualLinearVelocity =
+              AllianceFlipUtil.shouldFlip()
+                  ? manualLinearVelocity.rotateBy(new Rotation2d(Math.PI))
+                  : manualLinearVelocity;
+
+          // Auto-align section
+          updateTunables();
+          updateConstraints();
+
+          Pose2d targetPose = goalPose.get();
+
+          Translation2d driveVelocity = getLinearVelocityFromProfiledPID(targetPose);
+
+          // Calculate theta speed
+          double thetaVelocity = getAngularVelocityFromProfiledPID(targetPose);
+          if (thetaController.atGoal()) thetaVelocity = 0.0;
+
+          // Send command
+          double maxDistance = 2;
+          Translation2d distance =
+              poseManager.getTranslation().minus(goalPose.get().getTranslation());
+
+          // Linear blending
+          double finalX =
+              linearBlending(
+                  distance.getX(),
+                  maxDistance,
+                  flippedManualLinearVelocity.getX(),
+                  driveVelocity.getX(),
+                  "X");
+          double finalY =
+              linearBlending(
+                  distance.getY(),
+                  maxDistance,
+                  flippedManualLinearVelocity.getY(),
+                  driveVelocity.getY(),
+                  "Y");
+
+          runVelocity(
+              ChassisSpeeds.fromFieldRelativeSpeeds(
+                  finalX, finalY, thetaVelocity, poseManager.getRotation()));
+        })
+        .beforeStarting(() -> resetControllers(goalPose.get()))
+        .withName("Partial Auto Drive");
+  }
+
+  private double linearBlending(
+      double distance,
+      double maxDistance,
+      double manualVelocity,
+      double autoVelocity,
+      String axis) {
+    double error = Math.min(Math.abs(distance) / partialAutoLinearkP.get(), maxDistance);
+    double P = error / maxDistance;
+    double manualFinal = manualVelocity * P;
+    double autoFinal = autoVelocity * (1 - P);
+
+    // Logger.recordOutput("Controls/partialAuto/"+axis+"P", P);
+    // Logger.recordOutput("Controls/partialAuto/manual"+axis, manualFinal);
+    // Logger.recordOutput("Controls/partialAuto/auto"+axis, autoFinal);
+
+    return manualFinal + autoFinal;
   }
 
   public Command driveIntoWall() {
@@ -719,6 +602,25 @@ public class Drive extends SubsystemBase {
         && !config.povUpPressed()
         && !config.povLeftPressed()
         && !config.povRightPressed();
+  }
+
+  private double getAngularVelocityFromJoysticks() {
+    // Convert to doubles
+    double o = config.getOmegaInput();
+
+    // Apply deadband
+    double omega = MathUtil.applyDeadband(o, DEADBAND);
+
+    // Check for slow mode
+    if (config.slowMode().getAsBoolean()) {
+      omega *= config.slowTurnMultiplier().get();
+    }
+
+    // Square values and scale to max velocity
+    omega = Math.copySign(omega * omega, omega);
+    omega *= maxAngularSpeedRadiansPerSec;
+
+    return omega;
   }
 
   private Translation2d getLinearVelocityFromJoysticks() {
@@ -747,14 +649,57 @@ public class Drive extends SubsystemBase {
     return linearVelocity;
   }
 
-  private double getAngularVelocityFromProfiledPID(double goalHeadingRads) {
+  private double getAngularVelocityFromProfiledPID(Pose2d targetPose) {
+    return getAngularVelocityFromProfiledPID(targetPose.getRotation());
+  }
+
+  private double getAngularVelocityFromProfiledPID(Rotation2d rotation) {
     double output =
-        thetaController.calculate(
-            poseManager.getPose().getRotation().getRadians(), goalHeadingRads);
+        thetaController.calculate(poseManager.getRotation().getRadians(), rotation.getRadians());
+
+    if (thetaController.atGoal()) output = 0.0;
 
     Logger.recordOutput("Drive/Commands/HeadingError", thetaController.getPositionError());
     return output;
   }
+
+  private Translation2d getLinearVelocityFromProfiledPID(Pose2d targetPose) {
+    double currentDistance = poseManager.getDistanceTo(targetPose);
+    double ffScaler =
+        MathUtil.clamp(
+            (currentDistance - ffMinRadius.get()) / (ffMaxRadius.get() - ffMinRadius.get()),
+            0.0,
+            0.5);
+
+    // Reset the linear controller
+    linearController.reset(
+        lastSetpointTranslation.getDistance(targetPose.getTranslation()),
+        linearController.getSetpoint().velocity);
+
+    // Calculate linear speed
+    double driveVelocityScalar =
+        linearController.getSetpoint().velocity * ffScaler
+            + linearController.calculate(currentDistance, 0.0);
+
+    if (linearAtGoal()) driveVelocityScalar = 0.0;
+
+    lastSetpointTranslation =
+        new Pose2d(targetPose.getTranslation(), poseManager.getHorizontalAngleTo(targetPose))
+            .transformBy(GeomUtil.toTransform2d(linearController.getSetpoint().position, 0.0))
+            .getTranslation();
+
+    // Calculate angle to target then transform by velocity scalar
+    Translation2d driveVelocity =
+        new Pose2d(
+                new Translation2d(),
+                poseManager.getTranslation().minus(targetPose.getTranslation()).getAngle())
+            .transformBy(GeomUtil.toTransform2d(driveVelocityScalar, 0.0))
+            .getTranslation();
+
+    return driveVelocity;
+  }
+
+  // Methods for the feedback controllers
 
   private void updateTunables() {
     LoggedTunableNumber.ifChanged(
@@ -823,6 +768,7 @@ public class Drive extends SubsystemBase {
   }
 
   // Autos
+
   public void followTrajectory(SwerveSample sample) {
     updateAutoTunables();
     Pose2d pose = poseManager.getPose();
@@ -867,6 +813,7 @@ public class Drive extends SubsystemBase {
 
   // Tuning Commands
   // * For tuning drive motor PID values use Phoenix Tuner X (and maybe ff also?)
+
   private static final LoggedTunableNumber tuningTurnDelta =
       new LoggedTunableNumber("Drive/ModuleTunables/turnDeltaForTuning", 90);
   private static final LoggedTunableNumber tuningDriveSpeed =
@@ -897,6 +844,33 @@ public class Drive extends SubsystemBase {
             })
         .withTimeout(2.0)
         .withName("tuneModuleDrive");
+  }
+
+  // Characterization commands
+
+  /** Runs the drive in a straight line with the specified drive output. */
+  public void runCharacterization(double output) {
+    for (int i = 0; i < 4; i++) {
+      modules[i].runCharacterization(output);
+    }
+  }
+
+  /** Returns the position of each module in radians. */
+  public double[] getWheelRadiusCharacterizationPositions() {
+    double[] values = new double[4];
+    for (int i = 0; i < 4; i++) {
+      values[i] = modules[i].getWheelRadiusCharacterizationPosition();
+    }
+    return values;
+  }
+
+  /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
+  public double getFFCharacterizationVelocity() {
+    double output = 0.0;
+    for (int i = 0; i < 4; i++) {
+      output += modules[i].getFFCharacterizationVelocity() / 4.0;
+    }
+    return output;
   }
 
   private static final double FF_START_DELAY = 2.0; // Secs
@@ -1039,6 +1013,7 @@ public class Drive extends SubsystemBase {
   }
 
   // Module Testing
+
   private int moduleToTest = 0;
   public boolean allModules = false;
 

@@ -412,9 +412,11 @@ public class Robot extends LoggedRobot {
       drive.setDefaultCommand(drive.joystickDrive());
     }
     elevator.setDefaultCommand(elevator.disableElevator(carriage::algaeHeld));
-    carriage.setDefaultCommand(carriage.stopOrHold());
+    carriage.setDefaultCommand(carriage.stopHoldOrIntake());
     intake.setDefaultCommand(intake.raiseAndStopOrHoldCmd());
     funnel.setDefaultCommand(funnel.stop());
+
+    new Trigger(() -> carriage.coralPassed).onTrue(carriage.intakeCoralV2());
 
     // Driver controls
     driver.rightTrigger().onTrue(runOnce(() -> Drive.nitro = !Drive.nitro));
@@ -452,6 +454,7 @@ public class Robot extends LoggedRobot {
     intakeTrigger.whileTrue(fullIntake(drive, carriage, intake, elevator, poseManager));
     driver
         .leftBumper()
+        .and(new Trigger(() -> false))
         .whileTrue(
             select(
                     Map.of(
@@ -500,7 +503,7 @@ public class Robot extends LoggedRobot {
                     either(
                         either(
                                 drive
-                                    .fullAutoDrive(goalPose(poseManager))
+                                    .partialAutoDrive(goalPose(poseManager))
                                     .andThen(
                                         either(
                                             drive.driveIntoWall(),
@@ -529,6 +532,16 @@ public class Robot extends LoggedRobot {
                     })
                 .finallyDo(() -> poseManager.lockClosest = false)
                 .withName("fullScore"));
+    driver.leftBumper().whileTrue(drive.partialAutoDrive(goalPose(poseManager)));
+    driver
+        .leftBumper()
+        .and(new Trigger(() -> scoreState == LeftBranch || scoreState == RightBranch))
+        .and(new Trigger(carriage::coralHeld))
+        .whileTrue(scoreCoral(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
+    driver
+        .leftBumper()
+        .and(new Trigger(carriage::coralHeld).and(new Trigger(carriage::algaeHeld)).negate())
+        .whileTrue(dealgify(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
 
     // Operator controls
     operator.y().onTrue(elevator.request(L3));
@@ -565,7 +578,7 @@ public class Robot extends LoggedRobot {
                 carriage.ejectCoral(),
                 funnel.eject(),
                 waitSeconds(0.2).andThen(carriage.resetHeld())));
-    operator.leftTrigger().onFalse(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+    // operator.leftTrigger().onFalse(RobotCommands.lowLevelCoralIntake(carriage, funnel));
     operator.povUp().onTrue(runOnce(() -> intakeState = Source));
     operator.povRight().onTrue(runOnce(() -> intakeState = Ice_Cream));
     operator.povDown().onTrue(runOnce(() -> intakeState = Ground));
@@ -599,13 +612,13 @@ public class Robot extends LoggedRobot {
         .and(DriverStation::isTeleop)
         .onTrue(runOnce(() -> scoreState = groundAlgae.get() ? ProcessorBack : ScoreL1));
 
-    intakeTrigger
-        .or(() -> poseManager.nearStation() && allowAutoDrive)
-        .and(() -> intakeState == Source && DriverStation.isTeleop() && !carriage.algaeHeld())
-        .onTrue(
-            RobotCommands.lowLevelCoralIntake(carriage, funnel)
-                .onlyWhile(() -> intakeOK)
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // intakeTrigger
+    //     .or(() -> poseManager.nearStation() && allowAutoDrive)
+    //     .and(() -> intakeState == Source && DriverStation.isTeleop() && !carriage.algaeHeld())
+    //     .onTrue(
+    //         RobotCommands.lowLevelCoralIntake(carriage, funnel)
+    //             .onlyWhile(() -> intakeOK)
+    //             .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     intakeTrigger.onFalse(
         runOnce(() -> intakeOK = false).andThen(waitSeconds(0.1), runOnce(() -> intakeOK = true)));
@@ -706,9 +719,7 @@ public class Robot extends LoggedRobot {
 
   private Command elevatorAndCarriageTest() {
     Timer timer = new Timer();
-    return carriage
-        .intakeCoral()
-        .asProxy()
+    return waitUntil(carriage::coralHeld)
         .andThen(
             elevator.request(L2),
             elevator.enableElevator(),
