@@ -3,12 +3,16 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 
+import java.util.Map;
+import java.util.HashMap;
+
 public class VisionConstants {
   public static final double fieldBorderMargin = 0.2; // meters
 
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
 
   public static final String leftName = "limelight-left";
   // Change the camera pose relative to robot center (x forward, y left, z up, degrees)
@@ -18,9 +22,15 @@ public class VisionConstants {
   public static final double leftRoll = 181; // degrees
   public static final double leftPitch = -19; // degrees
   public static final double leftYaw = -25; // degrees
-  public static final double[] leftPosition = {
-    leftForwardOffset, leftSideOffset, leftHeightOffset, leftRoll, leftPitch, leftYaw
-  };
+  public static final Map<String, Double> leftPosition = Map.ofEntries(
+    Map.entry("forwardOffset", leftForwardOffset),
+    Map.entry("sideOffset", leftSideOffset),
+    Map.entry("heightOffset", leftHeightOffset),
+    Map.entry("roll", leftRoll),
+    Map.entry("pitch", leftPitch),
+    Map.entry("yaw", leftYaw)
+  );
+
   public static final String rightName = "limelight-right";
   // Change the camera pose relative to robot center (x forward, y left, z up, degrees)
   public static final double rightForwardOffset = 0.29; // meters
@@ -29,9 +39,14 @@ public class VisionConstants {
   public static final double rightRoll = 180; // degrees
   public static final double rightPitch = -19; // degrees
   public static final double rightYaw = 25; // degrees
-  public static final double[] rightPosition = {
-    rightForwardOffset, rightSideOffset, rightHeightOffset, rightRoll, rightPitch, rightYaw
-  };
+  public static final Map<String, Double> rightPosition = Map.ofEntries(
+    Map.entry("forwardOffset", rightForwardOffset),
+    Map.entry("sideOffset", rightSideOffset),
+    Map.entry("heightOffset", rightHeightOffset),
+    Map.entry("roll", rightRoll),
+    Map.entry("pitch", rightPitch),
+    Map.entry("yaw", rightYaw)
+  );
 
   public static enum CamName {
     Left(leftName),
@@ -46,7 +61,7 @@ public class VisionConstants {
 
   // can't log rawDetection class so heres a reference so that i know what index of the double
   // corresponds ot what
-  public static class rawDetectionRef {
+  public static class RawDetectionRef {
     public static int classId = 0;
     public static int txnc = 1;
     public static int tync = 2;
