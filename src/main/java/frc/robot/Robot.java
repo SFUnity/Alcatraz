@@ -240,6 +240,13 @@ public class Robot extends LoggedRobot {
                 poseManager,
                 new AprilTagVisionIOLimelight(leftName),
                 new AprilTagVisionIOLimelight(rightName));
+        // elevator = new Elevator(new ElevatorIOSim(), poseManager);
+        // carriage = new Carriage(new CarriageIOSim(), poseManager);
+        // intake = new Intake(new IntakeIOSim());
+        // funnel = new Funnel(new FunnelIOSim());
+        // vision =
+        //     new AprilTagVision(poseManager, new AprilTagVisionIO() {}, new AprilTagVisionIO()
+        // {});
         break;
 
       case SIM:

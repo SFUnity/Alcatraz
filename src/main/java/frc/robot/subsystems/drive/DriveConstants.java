@@ -47,14 +47,14 @@ public class DriveConstants {
       new SwerveDriveKinematics(moduleTranslations);
 
   // Zeroed rotation values for each module, see setup instructions
-  public static final double frontLeftZeroRotation = -0.241943;
-  public static final double frontRightZeroRotation = 0.042969;
-  public static final double backLeftZeroRotation = -0.027;
+  public static final double frontLeftZeroRotation = -0.24169921875;
+  public static final double frontRightZeroRotation = -0.2587890625;
+  public static final double backLeftZeroRotation = -0.02685546875;
   public static final double backRightZeroRotation = 0.484375;
 
   // Motor/encoder inverted values for each module
   public static final boolean frontLeftDriveInverted = true;
-  public static final boolean frontRightDriveInverted = false;
+  public static final boolean frontRightDriveInverted = true;
   public static final boolean backLeftDriveInverted = false;
   public static final boolean backRightDriveInverted = false;
 
@@ -72,9 +72,9 @@ public class DriveConstants {
   public static final int pigeonCanId = 20;
 
   public static final int frontLeftDriveCanId = 3;
-  public static final int frontRightDriveCanId = 4; // It's in PDH port 1
-  public static final int backLeftDriveCanId = 19;
-  public static final int backRightDriveCanId = 13;
+  public static final int frontRightDriveCanId = 13; // It's in PDH port 1
+  public static final int backLeftDriveCanId = 4;
+  public static final int backRightDriveCanId = 61;
 
   public static final int frontLeftTurnCanId = 8;
   public static final int frontRightTurnCanId = 6;
@@ -82,9 +82,9 @@ public class DriveConstants {
   public static final int backRightTurnCanId = 17;
 
   public static final int frontLeftTurnEncoderCanId = 19;
-  public static final int frontRightTurnEncoderCanId = 4;
-  public static final int backLeftTurnEncoderCanId = 18;
-  public static final int backRightTurnEncoderCanId = 5;
+  public static final int frontRightTurnEncoderCanId = 5;
+  public static final int backLeftTurnEncoderCanId = 25;
+  public static final int backRightTurnEncoderCanId = 18;
 
   public static final String CANBusName = "rio";
 
