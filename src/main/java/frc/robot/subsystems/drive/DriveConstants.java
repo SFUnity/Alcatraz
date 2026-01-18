@@ -47,14 +47,14 @@ public class DriveConstants {
       new SwerveDriveKinematics(moduleTranslations);
 
   // Zeroed rotation values for each module, see setup instructions
-  public static final double frontLeftZeroRotation = -0.24169921875;
-  public static final double frontRightZeroRotation = -0.116211;
-  public static final double backLeftZeroRotation = -0.02685546875;
-  public static final double backRightZeroRotation = -0.297852; //Seems correct
+  public static final double frontLeftZeroRotation = -0.238281;
+  public static final double frontRightZeroRotation = 0.238281;
+  public static final double backLeftZeroRotation = 0.066895;
+  public static final double backRightZeroRotation = -0.297852; // Seems correct
 
   // Motor/encoder inverted values for each module
-  public static final boolean frontLeftDriveInverted = true;
-  public static final boolean frontRightDriveInverted = true;
+  public static final boolean frontLeftDriveInverted = false;
+  public static final boolean frontRightDriveInverted = false;
   public static final boolean backLeftDriveInverted = false;
   public static final boolean backRightDriveInverted = false;
 
