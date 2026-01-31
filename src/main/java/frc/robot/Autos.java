@@ -14,7 +14,6 @@ import choreo.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.elevator.Elevator;
@@ -190,8 +189,8 @@ public class Autos {
       AutoTrajectory LToStationHigh) {
 
     // Intake when near station
-    new Trigger(() -> poseManager.nearStation(1.75))
-        .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+    // new Trigger(() -> poseManager.nearStation(1.75))
+    //     .whileTrue(RobotCommands.lowLevelCoralIntake(carriage, funnel));
 
     // When the routine begins, reset odometry and start the first trajectory
     routine

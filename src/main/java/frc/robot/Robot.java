@@ -18,10 +18,10 @@ import static frc.robot.RobotCommands.*;
 import static frc.robot.RobotCommands.IntakeState.*;
 import static frc.robot.RobotCommands.ScoreState.*;
 import static frc.robot.constantsGlobal.FieldConstants.*;
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.leftName;
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.rightName;
 import static frc.robot.subsystems.elevator.ElevatorConstants.ElevatorHeight.*;
 import static frc.robot.subsystems.intake.IntakeConstants.groundAlgae;
+import static frc.robot.subsystems.vision.VisionConstants.leftName;
+import static frc.robot.subsystems.vision.VisionConstants.rightName;
 import static frc.robot.util.AllianceFlipUtil.*;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -42,9 +42,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.constantsGlobal.BuildConstants;
 import frc.robot.constantsGlobal.Constants;
-import frc.robot.subsystems.apriltagvision.AprilTagVision;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIO;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionIOLimelight;
 import frc.robot.subsystems.carriage.Carriage;
 import frc.robot.subsystems.carriage.CarriageIO;
 import frc.robot.subsystems.carriage.CarriageIOSim;
@@ -69,6 +66,9 @@ import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOSim;
 import frc.robot.subsystems.intake.IntakeIOSparkMax;
 import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.PoseManager;
 import frc.robot.util.VirtualSubsystem;
@@ -106,7 +106,7 @@ public class Robot extends LoggedRobot {
   private final Timer canInitialErrorTimer = new Timer();
   private final Timer canErrorTimer = new Timer();
 
-  private final Alert canErrorAlert =
+  private final Alert canErrorAlert = // YAY always fun
       new Alert("CAN errors detected, robot may not be controllable.", AlertType.kError);
   private final Alert lowBatteryAlert =
       new Alert(
@@ -121,7 +121,7 @@ public class Robot extends LoggedRobot {
   private final Carriage carriage;
   private final Intake intake;
   private final Funnel funnel;
-  private final AprilTagVision vision;
+  private final Vision vision;
 
   // Non-subsystems
   private final PoseManager poseManager = new PoseManager();
@@ -236,17 +236,8 @@ public class Robot extends LoggedRobot {
         intake = new Intake(new IntakeIOSparkMax());
         funnel = new Funnel(new FunnelIOSparkMax());
         vision =
-            new AprilTagVision(
-                poseManager,
-                new AprilTagVisionIOLimelight(leftName),
-                new AprilTagVisionIOLimelight(rightName));
-        // elevator = new Elevator(new ElevatorIOSim(), poseManager);
-        // carriage = new Carriage(new CarriageIOSim(), poseManager);
-        // intake = new Intake(new IntakeIOSim());
-        // funnel = new Funnel(new FunnelIOSim());
-        // vision =
-        //     new AprilTagVision(poseManager, new AprilTagVisionIO() {}, new AprilTagVisionIO()
-        // {});
+            new Vision(
+                poseManager, new VisionIOLimelight(leftName), new VisionIOLimelight(rightName));
         break;
 
       case SIM:
@@ -264,8 +255,7 @@ public class Robot extends LoggedRobot {
         carriage = new Carriage(new CarriageIOSim(), poseManager);
         intake = new Intake(new IntakeIOSim());
         funnel = new Funnel(new FunnelIOSim());
-        vision =
-            new AprilTagVision(poseManager, new AprilTagVisionIO() {}, new AprilTagVisionIO() {});
+        vision = new Vision(poseManager, new VisionIO() {}, new VisionIO() {});
         break;
 
       default:
@@ -284,15 +274,15 @@ public class Robot extends LoggedRobot {
         intake = new Intake(new IntakeIO() {});
         funnel = new Funnel(new FunnelIO() {});
         vision =
-            new AprilTagVision(
+            new Vision(
                 poseManager,
-                new AprilTagVisionIO() {
+                new VisionIO() {
                   @Override
                   public String getName() {
                     return leftName;
                   }
                 },
-                new AprilTagVisionIO() {
+                new VisionIO() {
                   @Override
                   public String getName() {
                     return rightName;
@@ -422,9 +412,11 @@ public class Robot extends LoggedRobot {
       drive.setDefaultCommand(drive.joystickDrive());
     }
     elevator.setDefaultCommand(elevator.disableElevator(carriage::algaeHeld));
-    carriage.setDefaultCommand(carriage.stopOrHold());
+    carriage.setDefaultCommand(carriage.stopHoldOrIntake());
     intake.setDefaultCommand(intake.raiseAndStopOrHoldCmd());
     funnel.setDefaultCommand(funnel.stop());
+
+    new Trigger(() -> carriage.coralPassed).onTrue(carriage.intakeCoralV2());
 
     // Driver controls
     driver.rightTrigger().onTrue(runOnce(() -> Drive.nitro = !Drive.nitro));
@@ -462,6 +454,7 @@ public class Robot extends LoggedRobot {
     intakeTrigger.whileTrue(fullIntake(drive, carriage, intake, elevator, poseManager));
     driver
         .leftBumper()
+        .and(new Trigger(() -> false))
         .whileTrue(
             select(
                     Map.of(
@@ -510,7 +503,7 @@ public class Robot extends LoggedRobot {
                     either(
                         either(
                                 drive
-                                    .fullAutoDrive(goalPose(poseManager))
+                                    .partialAutoDrive(goalPose(poseManager))
                                     .andThen(
                                         either(
                                             drive.driveIntoWall(),
@@ -539,6 +532,16 @@ public class Robot extends LoggedRobot {
                     })
                 .finallyDo(() -> poseManager.lockClosest = false)
                 .withName("fullScore"));
+    driver.leftBumper().whileTrue(drive.partialAutoDrive(goalPose(poseManager)));
+    driver
+        .leftBumper()
+        .and(new Trigger(() -> scoreState == LeftBranch || scoreState == RightBranch))
+        .and(new Trigger(carriage::coralHeld))
+        .whileTrue(scoreCoral(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
+    driver
+        .leftBumper()
+        .and(new Trigger(carriage::coralHeld).and(new Trigger(carriage::algaeHeld)).negate())
+        .whileTrue(dealgify(elevator, carriage, poseManager, atGoal(drive, driveCommandsConfig)));
 
     // Operator controls
     operator.y().onTrue(elevator.request(L3));
@@ -575,7 +578,7 @@ public class Robot extends LoggedRobot {
                 carriage.ejectCoral(),
                 funnel.eject(),
                 waitSeconds(0.2).andThen(carriage.resetHeld())));
-    operator.leftTrigger().onFalse(RobotCommands.lowLevelCoralIntake(carriage, funnel));
+    // operator.leftTrigger().onFalse(RobotCommands.lowLevelCoralIntake(carriage, funnel));
     operator.povUp().onTrue(runOnce(() -> intakeState = Source));
     operator.povRight().onTrue(runOnce(() -> intakeState = Ice_Cream));
     operator.povDown().onTrue(runOnce(() -> intakeState = Ground));
@@ -609,13 +612,13 @@ public class Robot extends LoggedRobot {
         .and(DriverStation::isTeleop)
         .onTrue(runOnce(() -> scoreState = groundAlgae.get() ? ProcessorBack : ScoreL1));
 
-    intakeTrigger
-        .or(() -> poseManager.nearStation() && allowAutoDrive)
-        .and(() -> intakeState == Source && DriverStation.isTeleop() && !carriage.algaeHeld())
-        .onTrue(
-            RobotCommands.lowLevelCoralIntake(carriage, funnel)
-                .onlyWhile(() -> intakeOK)
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // intakeTrigger
+    //     .or(() -> poseManager.nearStation() && allowAutoDrive)
+    //     .and(() -> intakeState == Source && DriverStation.isTeleop() && !carriage.algaeHeld())
+    //     .onTrue(
+    //         RobotCommands.lowLevelCoralIntake(carriage, funnel)
+    //             .onlyWhile(() -> intakeOK)
+    //             .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     intakeTrigger.onFalse(
         runOnce(() -> intakeOK = false).andThen(waitSeconds(0.1), runOnce(() -> intakeOK = true)));
@@ -716,9 +719,7 @@ public class Robot extends LoggedRobot {
 
   private Command elevatorAndCarriageTest() {
     Timer timer = new Timer();
-    return carriage
-        .intakeCoral()
-        .asProxy()
+    return waitUntil(carriage::coralHeld)
         .andThen(
             elevator.request(L2),
             elevator.enableElevator(),

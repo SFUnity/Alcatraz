@@ -395,6 +395,7 @@ public class LimelightHelpers {
     public double corner2_Y = 0;
     public double corner3_X = 0;
     public double corner3_Y = 0;
+    public double[] toDouble;
 
     public RawDetection(
         int classId,
@@ -421,6 +422,12 @@ public class LimelightHelpers {
       this.corner2_Y = corner2_Y;
       this.corner3_X = corner3_X;
       this.corner3_Y = corner3_Y;
+
+      this.toDouble =
+          new double[] {
+            classId, txnc, tync, ta, corner0_X, corner0_Y, corner1_X, corner1_Y, corner2_X,
+            corner2_Y, corner3_X, corner3_Y
+          };
     }
   }
 

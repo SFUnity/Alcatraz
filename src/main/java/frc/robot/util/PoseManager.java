@@ -19,6 +19,7 @@ import frc.robot.RobotCommands.ScoreState;
 import frc.robot.constantsGlobal.FieldConstants.CoralStation;
 import frc.robot.constantsGlobal.FieldConstants.Face;
 import frc.robot.subsystems.drive.DriveConstants;
+import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -238,5 +239,76 @@ public class PoseManager {
 
   public boolean nearStation() {
     return nearStation(0.5);
+  }
+
+  public LinkedList<Translation2d> coralPositions = new LinkedList<>();
+  public LinkedList<Translation2d> algaePositions = new LinkedList<>();
+
+  public Translation2d getNearestCoral() {
+    Translation2d closest = coralPositions.getFirst();
+    for (Translation2d i : coralPositions) {
+      if (getDistanceTo(i) < getDistanceTo(closest)) {
+        closest = i;
+      }
+    }
+    return closest;
+  }
+
+  public Translation2d getNearestAlgae() {
+    Translation2d closest = algaePositions.getFirst();
+    for (Translation2d i : algaePositions) {
+      if (getDistanceTo(i) < getDistanceTo(closest)) {
+        closest = i;
+      }
+    }
+    return closest;
+  }
+
+  public void addCoral(Translation2d coral) {
+    coralPositions.add(coral);
+  }
+
+  public void addAlgae(Translation2d algae) {
+    algaePositions.add(algae);
+  }
+
+  public void clearCoral() {
+    coralPositions = new LinkedList<>();
+  }
+
+  public void clearAlgae() {
+    algaePositions = new LinkedList<>();
+  }
+
+  public Translation2d getNearestCoralTo(Pose2d pose) {
+    return getNearestCoralTo(pose.getTranslation());
+  }
+
+  public Translation2d getNearestCoralTo(Translation2d translation) {
+    Translation2d closest = coralPositions.getFirst();
+    double closestDist = translation.getDistance(closest);
+    for (Translation2d i : coralPositions) {
+      if (translation.getDistance(i) < closestDist) {
+        closest = i;
+        closestDist = translation.getDistance(i);
+      }
+    }
+    return closest;
+  }
+
+  public Translation2d getNearestAlgaeTo(Pose2d pose) {
+    return getNearestAlgaeTo(pose.getTranslation());
+  }
+
+  public Translation2d getNearestAlgaeTo(Translation2d translation) {
+    Translation2d closest = algaePositions.getFirst();
+    double closestDist = translation.getDistance(closest);
+    for (Translation2d i : algaePositions) {
+      if (translation.getDistance(i) < closestDist) {
+        closest = i;
+        closestDist = translation.getDistance(i);
+      }
+    }
+    return closest;
   }
 }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.carriage;
 
+import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static frc.robot.subsystems.carriage.CarriageConstants.*;
 
 import edu.wpi.first.math.filter.LinearFilter;
@@ -164,18 +165,18 @@ public class Carriage extends SubsystemBase {
     return inputs.beamBreak;
   }
 
-  public Command stopOrHold() {
+  public Command stopHoldOrIntake() {
     return run(() -> {
-          // if (inputs.currentAmps < 5) {
-          //   realAlgaeHeld = false;
-          // }
           if (!beamBreak() && coralHeld()) {
             io.runVolts(-intakingSpeedVolts.get());
+          } else if (algaeHeld()) {
+            io.runVolts(holdSpeedVolts.get());
+          } else if (coralHeld()) {
+            io.runVolts(0);
           } else {
-            io.runVolts(algaeHeld() ? holdSpeedVolts.get() : 0);
+            io.runVolts(intakingSpeedVolts.get());
           }
         })
-        .onlyWhile(() -> coralHeld() || algaeHeld())
         .withName("stop");
   }
 
@@ -215,21 +216,28 @@ public class Carriage extends SubsystemBase {
         .withName("lowDealgify");
   }
 
-  public Command intakeCoral() {
-    return Commands.either(
-            run(() -> io.runVolts(placeSpeedVolts.get())),
-            run(() -> io.runVolts(intakingSpeedVolts.get()))
-                .until(() -> coralPassed)
-                .andThen(
-                    run(() -> io.runVolts(slowIntakeSpeedVolts.get())).until(() -> !beamBreak()),
-                    run(() -> io.runVolts(-intakingSpeedVolts.get())).until(() -> beamBreak()))
-                .onlyIf(() -> !coralHeld()),
-            () -> coralInDanger)
-        .deadlineFor(
-            Commands.runEnd(
-                () -> Leds.getInstance().intakingActivated = true,
-                () -> Leds.getInstance().intakingActivated = false))
-        .withName("intake coral");
+  // public Command intakeCoral() {
+  //   return Commands.either(
+  //           run(() -> io.runVolts(placeSpeedVolts.get())),
+  //           run(() -> io.runVolts(intakingSpeedVolts.get()))
+  //               .until(() -> coralPassed)
+  //               .andThen(
+  //                   run(() -> io.runVolts(slowIntakeSpeedVolts.get())).until(() -> !beamBreak()),
+  //                   run(() -> io.runVolts(-intakingSpeedVolts.get())).until(() -> beamBreak()))
+  //               .onlyIf(() -> !coralHeld()),
+  //           () -> coralInDanger)
+  //       .deadlineFor(
+  //           Commands.runEnd(
+  //               () -> Leds.getInstance().intakingActivated = true,
+  //               () -> Leds.getInstance().intakingActivated = false))
+  //       .withName("intake coral");
+  // }
+
+  public Command intakeCoralV2() {
+    return sequence(
+            run(() -> io.runVolts(slowIntakeSpeedVolts.get())).until(() -> !beamBreak()),
+            run(() -> io.runVolts(-intakingSpeedVolts.get())).until(() -> beamBreak()))
+        .onlyIf(() -> !coralHeld());
   }
 
   public Command scoreProcessor() {

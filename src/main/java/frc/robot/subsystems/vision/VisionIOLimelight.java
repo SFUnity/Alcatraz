@@ -1,19 +1,28 @@
-package frc.robot.subsystems.apriltagvision;
+package frc.robot.subsystems.vision;
 
-import static frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 import static frc.robot.util.LimelightHelpers.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystems.apriltagvision.AprilTagVisionConstants.Pipelines;
-import frc.robot.util.LimelightHelpers.PoseEstimate;
+import frc.robot.subsystems.vision.VisionConstants.Pipelines;
 import frc.robot.util.PoseManager;
+import edu.wpi.first.math.util.Units;
+
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 
-public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class VisionIOLimelight implements VisionIO {
   private String name;
 
   private static final double disconnectedTimeout = 250;
@@ -23,7 +32,9 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
   private final double DEFAUlT_CROP = 0.9;
   // private final double CROP_BUFFER = 0.1;
 
-  public AprilTagVisionIOLimelight(String camName) {
+  Map<String, Double> position;
+
+  public VisionIOLimelight(String camName) {
     name = camName;
 
     disconnectedAlert = new Alert("No data from: " + name, AlertType.kError);
@@ -31,7 +42,6 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
     resetCropping();
     setLEDMode_PipelineControl(name);
 
-    double[] position;
     switch (name) {
       case rightName:
         position = rightPosition;
@@ -40,17 +50,17 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
         position = leftPosition;
         break;
       default:
-        position = new double[6];
+        position = new HashMap<String,Double>() {};
     }
     ;
     setCameraPose_RobotSpace(
         name,
-        position[0], // Forward offset (meters)
-        position[1], // Side offset (meters)
-        position[2], // Height offset (meters)
-        position[3], // Roll (degrees)
-        position[4], // Pitch (degrees)
-        position[5] // Yaw (degrees)
+        position.get("forwardOffset"), // Forward offset (meters)
+        position.get("sideOffset"), // Side offset (meters)
+        position.get("heightOffset"), // Height offset (meters)
+        position.get("roll"), // Roll (degrees)
+        position.get("pitch"), // Pitch (degrees)
+        position.get("yaw") // Yaw (degrees)
         );
 
     // int[] goodIDs = {12, 16};
@@ -92,6 +102,45 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
     disconnectedAlert.set(latency > disconnectedTimeout);
 
     // dynamicCropping();
+  }
+
+  @Override
+  public void updateInputs(ObjectDetectionVisionIOInputs inputs, PoseManager poseManager) {
+    RawDetection[] detections = getRawDetections(name);
+    inputs.detections = new double[detections.length][];
+    int i = 0;
+    for (RawDetection detection : detections) {
+      inputs.detections[i++] = detection.toDouble;
+    }
+
+    LinkedList<double[]> coral = new LinkedList<>();
+    LinkedList<double[]> algae = new LinkedList<>();
+
+    for (double[] detection : inputs.detections) {
+      // TODO check what each class number corresponds to
+      switch ((int) detection[RawDetectionRef.classId]) {
+        case 0:
+          coral.add(detection);
+          inputs.coralCount++;
+          break;
+        case 1:
+          algae.add(detection);
+          inputs.algaeCount++;
+          break;
+      }
+    }
+
+    inputs.corals = new double[coral.size()][];
+    i = 0;
+    for (double[] detection : coral) {
+      inputs.corals[i++] = detection;
+    }
+
+    inputs.algae = new double[algae.size()][];
+    i = 0;
+    for (double[] detection : algae) {
+      inputs.algae[i++] = detection;
+    }
   }
 
   @Override
@@ -145,5 +194,42 @@ public class AprilTagVisionIOLimelight implements AprilTagVisionIO {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public double getPipelineIndex() {
+    return getCurrentPipelineIndex(name);
+  }
+
+  public Translation2d getFieldRelativeSpherePosition(double[] detection, double ballRadius, PoseManager poseManager) {
+    Translation2d sphereTranslation = new Translation2d();
+    double xAngle = detection[RawDetectionRef.txnc];
+    double yAngle = detection[RawDetectionRef.tync];
+    //undo roll
+    Translation2d initialTranslation = new Translation2d(xAngle, yAngle);
+    Rotation2d roll = new Rotation2d(Units.degreesToRadians(position.get("roll")));
+    Translation2d newRotation = initialTranslation.rotateBy(roll);
+    xAngle = newRotation.getX();
+    yAngle = newRotation.getY();
+    //find distance on ground
+    double height = position.get("height");
+    Rotation2d pitch = new Rotation2d(Units.degreesToRadians(position.get("pitch")));
+    Rotation2d totalYAngle = new Rotation2d();
+    totalYAngle = totalYAngle.plus(pitch).plus(new Rotation2d(Units.degreesToRadians(yAngle)));
+    //law of sines
+    double distance = totalYAngle.getCos()*(height/totalYAngle.getSin());
+    //account for ball height
+    double extraDistance = distance*(ballRadius/height);
+    double trueDistance = distance-extraDistance;
+    //get the acc pos
+    sphereTranslation = new Translation2d(trueDistance, 0);
+    //rotate by yaw and xangle
+    sphereTranslation = sphereTranslation.rotateBy(new Rotation2d(Units.degreesToRadians(xAngle))).rotateBy(new Rotation2d(Units.degreesToRadians(position.get("yaw"))));
+    //move by cam position
+    Translation2d camPosition = new Translation2d(position.get("forwardOffset"), position.get("sideOffset"));
+    sphereTranslation = sphereTranslation.plus(camPosition);
+    //move and rotate by robot position
+    sphereTranslation = sphereTranslation.rotateBy(poseManager.getRotation()).plus(poseManager.getTranslation());
+    return sphereTranslation;
   }
 }
